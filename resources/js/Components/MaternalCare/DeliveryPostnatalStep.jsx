@@ -5,18 +5,19 @@ import FormSection from '@/Components/FormSection';
 
 export default function DeliveryPostnatalStep({ data, setData }) {
     return (
-        <div className="space-y-6">
+        <div className="space-y-10">
             {/* Delivery Information */}
             <FormSection 
                 title="Delivery Information"
+                description="Birth details and delivery type"
             >
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {/* Delivery Type */}
                     <div>
                         <InputLabel htmlFor="delivery_type" value="Delivery Type" />
                         <select
                             id="delivery_type"
-                            className="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                            className="mt-2 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-lg shadow-sm"
                             value={data.delivery_info.delivery_type}
                             onChange={(e) => setData('delivery_info', {
                                 ...data.delivery_info,
@@ -37,7 +38,7 @@ export default function DeliveryPostnatalStep({ data, setData }) {
                         <TextInput
                             id="birth_weight"
                             type="number"
-                            className="mt-1 block w-full"
+                            className="mt-2 block w-full"
                             value={data.delivery_info.birth_weight}
                             onChange={(e) => setData('delivery_info', {
                                 ...data.delivery_info,
@@ -52,7 +53,7 @@ export default function DeliveryPostnatalStep({ data, setData }) {
                         <InputLabel htmlFor="weight_category" value="Weight Category" />
                         <select
                             id="weight_category"
-                            className="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                            className="mt-2 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-lg shadow-sm"
                             value={data.delivery_info.weight_category}
                             onChange={(e) => setData('delivery_info', {
                                 ...data.delivery_info,
@@ -71,17 +72,18 @@ export default function DeliveryPostnatalStep({ data, setData }) {
             {/* Place of Delivery */}
             <FormSection 
                 title="Place of Delivery"
+                description="Facility type and location"
             >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Health Facility */}
-                    <div className="border border-gray-100 rounded p-4">
-                        <h4 className="text-sm font-medium text-gray-700 mb-3">Health Facility</h4>
-                        <div className="space-y-3">
+                    <div className="border border-gray-200 rounded-xl p-4 bg-gray-50">
+                        <h4 className="text-sm font-semibold text-gray-800 mb-4">Health Facility</h4>
+                        <div className="space-y-4">
                             <div>
                                 <InputLabel htmlFor="facility_type" value="Facility Type" className="text-xs" />
                                 <select
                                     id="facility_type"
-                                    className="mt-1 block w-full text-sm border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                                    className="mt-2 block w-full text-sm border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-lg shadow-sm"
                                     value={data.delivery_info.place_of_delivery.health_facility.type}
                                     onChange={(e) => setData('delivery_info', {
                                         ...data.delivery_info,
@@ -107,7 +109,7 @@ export default function DeliveryPostnatalStep({ data, setData }) {
                                 <InputLabel htmlFor="facility_capable" value="Facility Capability" className="text-xs" />
                                 <select
                                     id="facility_capable"
-                                    className="mt-1 block w-full text-sm border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                                    className="mt-2 block w-full text-sm border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-lg shadow-sm"
                                     value={data.delivery_info.place_of_delivery.health_facility.capable}
                                     onChange={(e) => setData('delivery_info', {
                                         ...data.delivery_info,
@@ -129,13 +131,13 @@ export default function DeliveryPostnatalStep({ data, setData }) {
                     </div>
 
                     {/* Non-Health Facility */}
-                    <div className="border border-gray-100 rounded p-4">
-                        <h4 className="text-sm font-medium text-gray-700 mb-3">Non-Health Facility</h4>
+                    <div className="border border-gray-200 rounded-xl p-4 bg-gray-50">
+                        <h4 className="text-sm font-semibold text-gray-800 mb-4">Non-Health Facility</h4>
                         <div>
                             <InputLabel htmlFor="non_health_facility" value="Location Type" className="text-xs" />
                             <select
                                 id="non_health_facility"
-                                className="mt-1 block w-full text-sm border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                                className="mt-2 block w-full text-sm border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-lg shadow-sm"
                                 value={data.delivery_info.place_of_delivery.non_health_facility}
                                 onChange={(e) => setData('delivery_info', {
                                     ...data.delivery_info,
@@ -157,13 +159,14 @@ export default function DeliveryPostnatalStep({ data, setData }) {
             {/* Birth Attendant and Delivery Details */}
             <FormSection 
                 title="Birth Attendant and Delivery Details"
+                description="Attendant information and delivery date/time"
             >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
                         <InputLabel htmlFor="birth_attendant" value="Birth Attendant" />
                         <select
                             id="birth_attendant"
-                            className="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                            className="mt-2 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-lg shadow-sm"
                             value={data.delivery_info.birth_attendant}
                             onChange={(e) => setData('delivery_info', {
                                 ...data.delivery_info,
@@ -180,11 +183,11 @@ export default function DeliveryPostnatalStep({ data, setData }) {
                     </div>
 
                     <div>
-                        <InputLabel htmlFor="delivery_date" value="Date of Delivery (mm/dd/yy)" />
+                        <InputLabel htmlFor="delivery_date" value="Date of Delivery" />
                         <TextInput
                             id="delivery_date"
                             type="date"
-                            className="mt-1 block w-full"
+                            className="mt-2 block w-full"
                             value={data.delivery_info.delivery_date}
                             onChange={(e) => setData('delivery_info', {
                                 ...data.delivery_info,
@@ -198,7 +201,7 @@ export default function DeliveryPostnatalStep({ data, setData }) {
                         <TextInput
                             id="delivery_time"
                             type="time"
-                            className="mt-1 block w-full"
+                            className="mt-2 block w-full"
                             value={data.delivery_info.delivery_time}
                             onChange={(e) => setData('delivery_info', {
                                 ...data.delivery_info,
@@ -211,67 +214,72 @@ export default function DeliveryPostnatalStep({ data, setData }) {
 
             {/* Date of Postnatal Care (4PNC) */}
             <FormSection 
-                title="Date of Postnatal Care (4PNC) - mm/dd/yy"
+                title="Date of Postnatal Care (4PNC)"
+                description="Four postnatal care contact dates"
             >
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <div>
-                        <InputLabel htmlFor="contact_1" value="Contact 1 - within 24 hours after delivery" className="text-xs" />
+                        <InputLabel htmlFor="contact_1" value="Contact 1" className="text-xs" />
                         <TextInput
                             id="contact_1"
                             type="date"
-                            className="mt-1 block w-full text-sm"
+                            className="mt-2 block w-full text-sm"
                             value={data.postnatal_care.contact_1}
                             onChange={(e) => setData('postnatal_care', {
                                 ...data.postnatal_care,
                                 contact_1: e.target.value
                             })}
                         />
+                        <p className="mt-1 text-xs text-gray-500">Within 24 hours</p>
                     </div>
 
                     <div>
-                        <InputLabel htmlFor="contact_2" value="Contact 2 - on day 3" className="text-xs" />
+                        <InputLabel htmlFor="contact_2" value="Contact 2" className="text-xs" />
                         <TextInput
                             id="contact_2"
                             type="date"
-                            className="mt-1 block w-full text-sm"
+                            className="mt-2 block w-full text-sm"
                             value={data.postnatal_care.contact_2}
                             onChange={(e) => setData('postnatal_care', {
                                 ...data.postnatal_care,
                                 contact_2: e.target.value
                             })}
                         />
+                        <p className="mt-1 text-xs text-gray-500">On day 3</p>
                     </div>
 
                     <div>
-                        <InputLabel htmlFor="contact_3" value="Contact 3 - between 7-14 days" className="text-xs" />
+                        <InputLabel htmlFor="contact_3" value="Contact 3" className="text-xs" />
                         <TextInput
                             id="contact_3"
                             type="date"
-                            className="mt-1 block w-full text-sm"
+                            className="mt-2 block w-full text-sm"
                             value={data.postnatal_care.contact_3}
                             onChange={(e) => setData('postnatal_care', {
                                 ...data.postnatal_care,
                                 contact_3: e.target.value
                             })}
                         />
+                        <p className="mt-1 text-xs text-gray-500">Between 7-14 days</p>
                     </div>
 
                     <div>
-                        <InputLabel htmlFor="contact_4" value="Contact 4 - 6 weeks after birth" className="text-xs" />
+                        <InputLabel htmlFor="contact_4" value="Contact 4" className="text-xs" />
                         <TextInput
                             id="contact_4"
                             type="date"
-                            className="mt-1 block w-full text-sm"
+                            className="mt-2 block w-full text-sm"
                             value={data.postnatal_care.contact_4}
                             onChange={(e) => setData('postnatal_care', {
                                 ...data.postnatal_care,
                                 contact_4: e.target.value
                             })}
                         />
+                        <p className="mt-1 text-xs text-gray-500">6 weeks after birth</p>
                     </div>
                 </div>
 
-                <div className="mt-4">
+                <div className="mt-6">
                     <label className="flex items-center">
                         <Checkbox
                             checked={data.postnatal_care.completed_4pnc}
@@ -290,7 +298,7 @@ export default function DeliveryPostnatalStep({ data, setData }) {
                 title="Postpartum Supplementation" 
                 description="Iron with Folic Acid (IFA) Supplementation"
             >
-                <div className="mb-3">
+                <div className="mb-4">
                     <label className="flex items-center">
                         <Checkbox
                             checked={data.postpartum_supplementation.completed_ifa}
@@ -303,13 +311,13 @@ export default function DeliveryPostnatalStep({ data, setData }) {
                     </label>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                     {[1, 2, 3].map((visitNum) => (
-                        <div key={visitNum} className="border border-gray-100 rounded p-3">
-                            <h4 className="text-sm font-medium text-gray-700 mb-2">
+                        <div key={visitNum} className="border border-gray-200 rounded-xl p-4 bg-gray-50">
+                            <h4 className="text-sm font-semibold text-gray-800 mb-3">
                                 {visitNum === 1 ? '1st' : visitNum === 2 ? '2nd' : '3rd'} Visit
                             </h4>
-                            <div className="space-y-2">
+                            <div className="space-y-3">
                                 <div>
                                     <InputLabel htmlFor={`postpartum_date_${visitNum}`} value="Date" className="text-xs" />
                                     <TextInput
@@ -348,7 +356,7 @@ export default function DeliveryPostnatalStep({ data, setData }) {
                                                 visits: newVisits
                                             });
                                         }}
-                                        placeholder="Number"
+                                        placeholder="Enter number"
                                     />
                                 </div>
                             </div>
@@ -356,11 +364,11 @@ export default function DeliveryPostnatalStep({ data, setData }) {
                     ))}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-gray-200 pt-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     {/* Completed IFA Supply - 1st */}
-                    <div className="border border-gray-100 rounded p-3">
-                        <h4 className="text-sm font-medium text-gray-700 mb-3">Completed IFA Supply - 1st</h4>
-                        <div className="space-y-2">
+                    <div className="border border-gray-200 rounded-xl p-4 bg-gray-50">
+                        <h4 className="text-sm font-semibold text-gray-800 mb-3">Completed IFA Supply - 1st</h4>
+                        <div className="space-y-3">
                             <div className="flex gap-4">
                                 <label className="flex items-center">
                                     <input
@@ -408,9 +416,9 @@ export default function DeliveryPostnatalStep({ data, setData }) {
                     </div>
 
                     {/* Completed IFA Supply - 2nd */}
-                    <div className="border border-gray-100 rounded p-3">
-                        <h4 className="text-sm font-medium text-gray-700 mb-3">Completed IFA Supply - 2nd</h4>
-                        <div className="space-y-2">
+                    <div className="border border-gray-200 rounded-xl p-4 bg-gray-50">
+                        <h4 className="text-sm font-semibold text-gray-800 mb-3">Completed IFA Supply - 2nd</h4>
+                        <div className="space-y-3">
                             <div className="flex gap-4">
                                 <label className="flex items-center">
                                     <input
@@ -458,11 +466,11 @@ export default function DeliveryPostnatalStep({ data, setData }) {
                     </div>
                 </div>
 
-                <div className="mt-4">
+                <div>
                     <InputLabel htmlFor="postpartum_remarks" value="Remarks" />
                     <select
                         id="postpartum_remarks"
-                        className="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                        className="mt-2 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-lg shadow-sm"
                         value={data.postpartum_supplementation.remarks}
                         onChange={(e) => setData('postpartum_supplementation', {
                             ...data.postpartum_supplementation,
