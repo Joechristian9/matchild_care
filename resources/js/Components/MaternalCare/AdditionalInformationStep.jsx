@@ -4,26 +4,28 @@ import FormSection from '@/Components/FormSection';
 
 export default function AdditionalInformationStep({ data, setData }) {
     return (
-        <div className="space-y-8">
-            {/* Nutritional Assessment */}
+        <div className="space-y-10">
+
+            {/* NUTRITIONAL ASSESSMENT */}
             <FormSection 
                 title="Nutritional Assessment" 
-                description="Write the BMI for 1st Trimester (1st visit)"
+                description="BMI and weight monitoring across trimesters"
             >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
                     <div>
                         <InputLabel htmlFor="height" value="Height (cm)" />
                         <TextInput
                             id="height"
                             type="number"
                             step="0.1"
-                            className="mt-1 block w-full"
+                            className="mt-2 block w-full"
                             value={data.nutritional_assessment.height}
                             onChange={(e) => setData('nutritional_assessment', {
                                 ...data.nutritional_assessment,
                                 height: e.target.value
                             })}
-                            placeholder="Height in cm"
+                            placeholder="Enter height"
                         />
                     </div>
 
@@ -33,13 +35,13 @@ export default function AdditionalInformationStep({ data, setData }) {
                             id="bmi_1st"
                             type="number"
                             step="0.1"
-                            className="mt-1 block w-full"
+                            className="mt-2 block w-full"
                             value={data.nutritional_assessment.bmi_1st}
                             onChange={(e) => setData('nutritional_assessment', {
                                 ...data.nutritional_assessment,
                                 bmi_1st: e.target.value
                             })}
-                            placeholder="BMI"
+                            placeholder="Enter BMI"
                         />
                     </div>
 
@@ -49,13 +51,12 @@ export default function AdditionalInformationStep({ data, setData }) {
                             id="weight_1st"
                             type="number"
                             step="0.1"
-                            className="mt-1 block w-full"
+                            className="mt-2 block w-full"
                             value={data.nutritional_assessment.weight_1st}
                             onChange={(e) => setData('nutritional_assessment', {
                                 ...data.nutritional_assessment,
                                 weight_1st: e.target.value
                             })}
-                            placeholder="Weight"
                         />
                     </div>
 
@@ -65,13 +66,12 @@ export default function AdditionalInformationStep({ data, setData }) {
                             id="weight_2nd"
                             type="number"
                             step="0.1"
-                            className="mt-1 block w-full"
+                            className="mt-2 block w-full"
                             value={data.nutritional_assessment.weight_2nd}
                             onChange={(e) => setData('nutritional_assessment', {
                                 ...data.nutritional_assessment,
                                 weight_2nd: e.target.value
                             })}
-                            placeholder="Weight"
                         />
                     </div>
 
@@ -81,13 +81,12 @@ export default function AdditionalInformationStep({ data, setData }) {
                             id="weight_3rd"
                             type="number"
                             step="0.1"
-                            className="mt-1 block w-full"
+                            className="mt-2 block w-full"
                             value={data.nutritional_assessment.weight_3rd}
                             onChange={(e) => setData('nutritional_assessment', {
                                 ...data.nutritional_assessment,
                                 weight_3rd: e.target.value
                             })}
-                            placeholder="Weight"
                         />
                     </div>
 
@@ -95,7 +94,7 @@ export default function AdditionalInformationStep({ data, setData }) {
                         <InputLabel htmlFor="remarks" value="Remarks" />
                         <select
                             id="remarks"
-                            className="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                            className="mt-2 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-lg shadow-sm"
                             value={data.nutritional_assessment.remarks}
                             onChange={(e) => setData('nutritional_assessment', {
                                 ...data.nutritional_assessment,
@@ -110,22 +109,23 @@ export default function AdditionalInformationStep({ data, setData }) {
                             <option value="B">B - Trans Out before receiving 8 ANC</option>
                         </select>
                     </div>
+
                 </div>
             </FormSection>
 
-            {/* Immunization Status */}
+            {/* IMMUNIZATION */}
             <FormSection 
                 title="Immunization Status" 
-                description="Date Tetanus Diphtheria (Td) - containing vaccine given (mm/dd/yy)"
+                description="Tetanus Diphtheria (Td) vaccination records"
             >
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-6 mb-6">
                     {['td1_tt1', 'td2_tt2', 'td3_tt3', 'td4_tt4', 'td5_tt5'].map((field, index) => (
                         <div key={field}>
                             <InputLabel htmlFor={field} value={`Td${index + 1}/TT${index + 1}`} />
                             <TextInput
                                 id={field}
                                 type="date"
-                                className="mt-1 block w-full"
+                                className="mt-2 block w-full"
                                 value={data.immunization_status[field]}
                                 onChange={(e) => setData('immunization_status', {
                                     ...data.immunization_status,
@@ -136,12 +136,12 @@ export default function AdditionalInformationStep({ data, setData }) {
                     ))}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <InputLabel htmlFor="fully_immunized" value="Fully Immunized Mother (FIM) Status" />
+                        <InputLabel htmlFor="fully_immunized" value="Fully Immunized Mother (FIM)" />
                         <select
                             id="fully_immunized"
-                            className="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm"
+                            className="mt-2 block w-full border-gray-300 rounded-lg shadow-sm"
                             value={data.immunization_status.fully_immunized}
                             onChange={(e) => setData('immunization_status', {
                                 ...data.immunization_status,
@@ -151,43 +151,45 @@ export default function AdditionalInformationStep({ data, setData }) {
                             <option value="">Select</option>
                             <option value="Y">Yes</option>
                             <option value="N">No</option>
-                            <option value="X">Unknown (Y or X)</option>
+                            <option value="X">Unknown</option>
                         </select>
                     </div>
 
                     <div>
-                        <InputLabel htmlFor="received_deworming" value="Received 1 Dose Deworming Tablet?" />
+                        <InputLabel htmlFor="received_deworming" value="Deworming Date" />
                         <TextInput
                             id="received_deworming"
                             type="date"
-                            className="mt-1 block w-full"
+                            className="mt-2 block w-full"
                             value={data.immunization_status.received_deworming}
                             onChange={(e) => setData('immunization_status', {
                                 ...data.immunization_status,
                                 received_deworming: e.target.value
                             })}
                         />
-                        <p className="mt-1 text-xs text-gray-500">Date (mm/dd/yy)</p>
                     </div>
                 </div>
             </FormSection>
 
-            {/* Prenatal Supplementation */}
+            {/* PRENATAL SUPPLEMENTATION */}
             <FormSection 
                 title="Prenatal Supplementation" 
-                description="Iron Folic Acid (IFA) Supplementation - Number of Tablets Given at Date (mm/dd/yy)"
+                description="Iron Folic Acid (IFA) distribution tracking"
             >
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {[1, 2, 3, 4, 5, 6].map((visitNum) => (
-                        <div key={visitNum} className="border border-gray-100 rounded p-3">
-                            <h4 className="text-sm font-medium text-gray-700 mb-2">
-                                {visitNum === 1 ? '1st' : visitNum === 2 ? '2nd' : visitNum === 3 ? '3rd' : `${visitNum}th`} Visit
+                        <div
+                            key={visitNum}
+                            className="border border-gray-200 rounded-xl p-4 bg-gray-50"
+                        >
+                            <h4 className="text-sm font-semibold text-gray-800 mb-3">
+                                Visit {visitNum}
                             </h4>
-                            <div className="space-y-2">
+
+                            <div className="space-y-3">
                                 <div>
-                                    <InputLabel htmlFor={`ifa_date_${visitNum}`} value="Date" className="text-xs" />
+                                    <InputLabel value="Date" className="text-xs" />
                                     <TextInput
-                                        id={`ifa_date_${visitNum}`}
                                         type="date"
                                         className="mt-1 block w-full text-sm"
                                         value={data.prenatal_supplementation.iron_folic_acid[visitNum - 1]?.date || ''}
@@ -204,10 +206,10 @@ export default function AdditionalInformationStep({ data, setData }) {
                                         }}
                                     />
                                 </div>
+
                                 <div>
-                                    <InputLabel htmlFor={`ifa_tablets_${visitNum}`} value="# Tablets" className="text-xs" />
+                                    <InputLabel value="# Tablets" className="text-xs" />
                                     <TextInput
-                                        id={`ifa_tablets_${visitNum}`}
                                         type="number"
                                         className="mt-1 block w-full text-sm"
                                         value={data.prenatal_supplementation.iron_folic_acid[visitNum - 1]?.tablets || ''}
@@ -222,7 +224,7 @@ export default function AdditionalInformationStep({ data, setData }) {
                                                 iron_folic_acid: newIFA
                                             });
                                         }}
-                                        placeholder="Number"
+                                        placeholder="Enter number"
                                     />
                                 </div>
                             </div>
@@ -230,6 +232,7 @@ export default function AdditionalInformationStep({ data, setData }) {
                     ))}
                 </div>
             </FormSection>
+
         </div>
     );
 }
