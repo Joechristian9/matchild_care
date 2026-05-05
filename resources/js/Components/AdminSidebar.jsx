@@ -1,7 +1,10 @@
 import { Link } from '@inertiajs/react';
-import { Home, Users, FileText, Activity, Settings, UserCog, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Home, Users, FileText, Activity, Settings, UserCog, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
+import { useState } from 'react';
 
 export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
+    const [showUserMenu, setShowUserMenu] = useState(false);
+    
     const navigation = [
         { name: 'Dashboard', href: route('dashboard'), icon: Home },
         { name: 'Maternal Care', href: route('parent.maternal-care'), icon: Activity },
@@ -70,44 +73,65 @@ export default function AdminSidebar({ isCollapsed, setIsCollapsed }) {
             <div className="border-t border-gray-200 p-4">
                 {!isCollapsed ? (
                     <>
-                        <div className="flex items-center mb-3">
+                        <button
+                            onClick={() => setShowUserMenu(!showUserMenu)}
+                            className="flex items-center w-full mb-3 hover:bg-gray-50 rounded-md p-2 transition-colors"
+                        >
                             <div className="flex-shrink-0">
                                 <div className="h-8 w-8 rounded-full bg-indigo-600 flex items-center justify-center">
                                     <span className="text-white text-sm font-medium">A</span>
                                 </div>
                             </div>
-                            <div className="ml-3">
+                            <div className="ml-3 flex-1 text-left">
                                 <p className="text-sm font-medium text-gray-900">Admin User</p>
                                 <p className="text-xs text-gray-500">Administrator</p>
                             </div>
-                        </div>
-                        <Link
-                            href={route('profile.edit')}
-                            className="block w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-md mb-1"
-                        >
-                            Profile Settings
-                        </Link>
-                        <Link
-                            href={route('logout')}
-                            method="post"
-                            as="button"
-                            className="block w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-md"
-                        >
-                            Sign out
-                        </Link>
+                            {showUserMenu ? (
+                                <ChevronUp className="h-4 w-4 text-gray-400" />
+                            ) : (
+                                <ChevronDown className="h-4 w-4 text-gray-400" />
+                            )}
+                        </button>
+                        
+                        {showUserMenu && (
+                            <div className="space-y-1 pl-2">
+                                <Link
+                                    href={route('profile.edit')}
+                                    className="block w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-md"
+                                >
+                                    Profile Settings
+                                </Link>
+                                <Link
+                                    href={route('logout')}
+                                    method="post"
+                                    as="button"
+                                    className="block w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-gray-900 rounded-md"
+                                >
+                                    Sign out
+                                </Link>
+                            </div>
+                        )}
                     </>
                 ) : (
                     <div className="flex flex-col items-center space-y-2">
-                        <div className="h-8 w-8 rounded-full bg-indigo-600 flex items-center justify-center">
-                            <span className="text-white text-sm font-medium">A</span>
-                        </div>
-                        <Link
-                            href={route('profile.edit')}
-                            className="p-2 text-gray-700 hover:bg-gray-50 rounded-md"
-                            title="Profile Settings"
+                        <button
+                            onClick={() => setShowUserMenu(!showUserMenu)}
+                            className="h-8 w-8 rounded-full bg-indigo-600 flex items-center justify-center hover:bg-indigo-700 transition-colors"
+                            title="Admin User"
                         >
-                            <Settings className="h-5 w-5" />
-                        </Link>
+                            <span className="text-white text-sm font-medium">A</span>
+                        </button>
+                        {showUserMenu && (
+                            <div className="flex flex-col items-center space-y-1">
+                                <Link
+                                    href={route('profile.edit')}
+                                    className="p-2 text-gray-700 hover:bg-gray-50 rounded-md"
+                                    title="Profile Settings"
+                                >
+                                    <Settings className="h-5 w-5" />
+                                </Link>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
