@@ -1,5 +1,7 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head, Link } from "@inertiajs/react";
+import { useState, useEffect } from "react";
+import { SkeletonTable } from "@/Components/Skeleton";
 import {
     Plus,
     Baby,
@@ -96,13 +98,14 @@ export default function Index({ records = [] }) {
                         </p>
                     </div>
 
-                    <Link
-                        href={route("child.immunization.create")}
-                        className="inline-flex items-center justify-center gap-2 rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-violet-200 transition hover:bg-violet-700"
-                    >
-                        <Plus className="h-4 w-4" />
-                        New Record
-                    </Link>
+                        <Link
+                            href={route("child.immunization.create")}
+                            className="inline-flex items-center justify-center gap-2 rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-violet-200 transition hover:bg-violet-700"
+                        >
+                            <Plus className="h-4 w-4" />
+                            New Record
+                        </Link>
+                    </div>
                 </div>
             }
         >
@@ -399,6 +402,7 @@ export default function Index({ records = [] }) {
                                     )}
                                 </tbody>
                             </table>
+                            )}
                         </div>
                     </div>
                 </div>

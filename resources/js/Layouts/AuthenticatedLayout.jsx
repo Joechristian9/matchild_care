@@ -29,6 +29,12 @@ export default function AuthenticatedLayout({ header, children }) {
     }, [showSettings]);
 
     // Icons
+    const MenuIcon = () => (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+    );
+
     const HomeIcon = () => (
         <svg
             className="w-5 h-5"
@@ -73,6 +79,22 @@ export default function AuthenticatedLayout({ header, children }) {
                 strokeLinejoin="round"
                 strokeWidth={2}
                 d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            />
+        </svg>
+    );
+
+    const BabyIcon = () => (
+        <svg
+            className="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+        >
+            <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
             />
         </svg>
     );
@@ -209,9 +231,9 @@ export default function AuthenticatedLayout({ header, children }) {
                                 />
 
                                 {/* Settings Dropdown */}
-                                <div className="absolute bottom-0 left-full ml-3 mb-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-200 py-2 z-50 overflow-hidden">
+                                <div className="absolute bottom-0 left-full ml-3 mb-2 w-64 bg-white/90 backdrop-blur-xl rounded-xl shadow-2xl border border-white/20 py-2 z-50 overflow-hidden">
                                     {/* Header */}
-                                    <div className="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-indigo-50 to-purple-50">
+                                    <div className="px-4 py-3 border-b border-gray-100/50 bg-gradient-to-r from-indigo-50/50 to-purple-50/50">
                                         <p className="text-sm font-semibold text-gray-900">
                                             {user?.name}
                                         </p>
@@ -224,9 +246,9 @@ export default function AuthenticatedLayout({ header, children }) {
                                     <div className="py-2">
                                         <a
                                             href={route("profile.edit")}
-                                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 transition-all group"
+                                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gradient-to-r hover:from-indigo-50/50 hover:to-purple-50/50 transition-all group"
                                         >
-                                            <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center group-hover:bg-indigo-200 transition-colors">
+                                            <div className="w-8 h-8 rounded-lg bg-indigo-100/80 backdrop-blur-sm flex items-center justify-center group-hover:bg-indigo-200/80 transition-colors">
                                                 <UserIcon />
                                             </div>
                                             <div className="flex-1">
@@ -241,9 +263,9 @@ export default function AuthenticatedLayout({ header, children }) {
 
                                         <button
                                             onClick={handleLogout}
-                                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-all w-full text-left group"
+                                            className="flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50/50 transition-all w-full text-left group"
                                         >
-                                            <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center group-hover:bg-red-200 transition-colors">
+                                            <div className="w-8 h-8 rounded-lg bg-red-100/80 backdrop-blur-sm flex items-center justify-center group-hover:bg-red-200/80 transition-colors">
                                                 <LogoutIcon />
                                             </div>
                                             <div className="flex-1">
@@ -260,17 +282,17 @@ export default function AuthenticatedLayout({ header, children }) {
                             </>
                         )}
 
-                        {/* User Info - Clickable */}
+                        {/* User Info - Clickable with Glassmorphism */}
                         <button
                             onClick={toggleSettings}
-                            className="flex items-center gap-3 w-full hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 rounded-xl p-3 transition-all group relative overflow-hidden"
+                            className="flex items-center gap-3 w-full rounded-xl p-3 transition-all group relative overflow-hidden bg-gradient-to-r from-indigo-50/50 via-purple-50/50 to-pink-50/50 backdrop-blur-sm border border-white/20 hover:border-indigo-200/50 shadow-sm hover:shadow-md"
                         >
                             {/* Hover effect background */}
-                            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 opacity-0 group-hover:opacity-5 transition-opacity" />
+                            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
 
                             {/* Avatar */}
                             <div className="relative flex-shrink-0">
-                                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-lg ring-2 ring-white group-hover:ring-indigo-200 transition-all">
+                                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-lg ring-2 ring-white/50 group-hover:ring-indigo-200/80 transition-all backdrop-blur-sm">
                                     {user?.name?.charAt(0).toUpperCase()}
                                 </div>
                                 {/* Online indicator */}
@@ -302,26 +324,20 @@ export default function AuthenticatedLayout({ header, children }) {
                         label="Dashboard"
                         active={route().current("dashboard")}
                     />
-                    <SidebarItem
-                        href="/"
-                        icon={<HomeIcon />}
-                        label="Home"
-                        active={route().current("welcome")}
-                    />
                 </SidebarGroup>
 
-                <SidebarGroup title="Parent Services">
+                <SidebarGroup title="Parent & Child Services">
                     <SidebarItem
                         href={route("parent.maternal-care")}
                         icon={<MaternalCareIcon />}
                         label="Maternal Care"
-                        active={route().current("parent.maternal-care")}
+                        active={route().current('parent.maternal-care')}
                     />
                     <SidebarItem
                         href={route("child.immunization.index")}
-                        icon={<MaternalCareIcon />}
+                        icon={<BabyIcon />}
                         label="Child Immunization"
-                        active={route().current("child.immunization.index")}
+                        active={route().current('child.immunization.*')}
                     />
                 </SidebarGroup>
             </Sidebar>
@@ -330,7 +346,7 @@ export default function AuthenticatedLayout({ header, children }) {
             <div className="flex-1 flex flex-col min-w-0">
                 <main className="flex-1">
                     {header && (
-                        <header className="bg-white shadow sticky top-0 z-10">
+                        <header className="bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 border-b border-indigo-100 shadow-sm sticky top-0 z-40 backdrop-blur-sm bg-white/80">
                             <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
                                 {header}
                             </div>

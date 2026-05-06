@@ -15,12 +15,13 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Create test user
+        User::factory()->create([
+            'name' => 'joe',
+            'email' => 'joe@gmail.com',
+            'password' => bcrypt('123'),
         $this->call([
             RolePermissionSeeder::class,
-        ]);
-        $this->call([
-            MaternalRecordSeeder::class,
-            ChildImmunizationSeeder::class,
         ]);
     }
 }

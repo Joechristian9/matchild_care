@@ -18,6 +18,7 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', function () {
+    // Optimize queries with select() to fetch only needed columns
     // Check user role and redirect accordingly
     if (auth()->user()->hasRole('patient')) {
         return redirect()->route('patient.dashboard');
@@ -34,15 +35,30 @@ Route::get('/dashboard', function () {
                 $query->whereNull('visit_date');
             })
             ->count(),
-        'recent_registrations' => \App\Models\MaternalRecord::latest()
+        // Optimize: Only select needed columns for recent registrations
+        'recent_registrations' => \App\Models\MaternalRecord::select([
+                'id', 'first_name', 'last_name', 'date_of_registration', 'age', 'age_group'
+            ])
+            ->orderBy('date_of_registration', 'desc')
             ->take(5)
-            ->get(['id', 'first_name', 'last_name', 'date_of_registration', 'age', 'age_group']),
+            ->get(),
         'this_month' => \App\Models\MaternalRecord::whereMonth('date_of_registration', now()->month)
             ->whereYear('date_of_registration', now()->year)
             ->count(),
     ];
-
-    return Inertia::render('Dashboard', ['stats' => $stats]);
+    
+    // Optimize: Only select needed columns for records table and paginate
+    $records = \App\Models\MaternalRecord::select([
+            'id', 'family_serial', 'first_name', 'last_name', 'middle_initial', 
+            'age', 'age_group', 'date_of_registration', 'expected_date_of_delivery'
+        ])
+        ->orderBy('id', 'desc')  // Order by ID descending (latest first)
+        ->paginate(15);
+    
+    return Inertia::render('Dashboard', [
+        'stats' => $stats,
+        'records' => $records
+    ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
@@ -68,9 +84,14 @@ Route::middleware('auth')->group(function () {
     Route::prefix('parent')->name('parent.')->group(function () {
         Route::get('/maternal-care', [MaternalCareController::class, 'index'])->name('maternal-care');
         Route::post('/maternal-care', [MaternalCareController::class, 'store'])->name('maternal-care.store');
+        Route::get('/maternal-care/{id}/edit', [MaternalCareController::class, 'edit'])->name('maternal-care.edit');
+        Route::put('/maternal-care/{id}', [MaternalCareController::class, 'update'])->name('maternal-care.update');
+        // Bulk PDF route
+        Route::get('/maternal-care/bulk-pdf', [MaternalCareController::class, 'generateBulkPdf'])->name('maternal-care.bulk-pdf');
     });
     Route::prefix('child')->name('child.')->group(function () {
         // Child Immunization Routes
+        Route::get('/immunization/bulk-pdf', [ChildImmunizationController::class, 'generateBulkPdf'])->name('immunization.bulk-pdf');
         Route::resource('/immunization', ChildImmunizationController::class);
     });
 

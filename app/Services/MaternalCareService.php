@@ -60,6 +60,200 @@ class MaternalCareService
         });
     }
 
+    /**
+     * Update an existing maternal care record with all related data
+     */
+    public function updateMaternalRecord(int $id, array $data, int $userId): MaternalRecord
+    {
+        return DB::transaction(function () use ($id, $data, $userId) {
+            $maternalRecord = MaternalRecord::findOrFail($id);
+            
+            // Update main maternal record
+            $maternalRecord->update([
+                'date_of_registration' => $data['date_of_registration'],
+                'family_serial' => $data['family_serial'],
+                'last_name' => $data['last_name'],
+                'first_name' => $data['first_name'],
+                'middle_initial' => $data['middle_initial'] ?? null,
+                'address' => $data['address'],
+                'age' => $data['age'],
+                'age_group' => $data['age_group'],
+                'last_menstrual_period' => $data['last_menstrual_period'],
+                'gravida' => $data['gravida'],
+                'parity' => $data['parity'],
+                'expected_date_of_delivery' => $data['expected_date_of_delivery'] ?? null,
+            ]);
+            
+            // Update or create related records
+            $this->updateOrCreatePrenatalVisits($maternalRecord, $data['visits'] ?? []);
+            $this->updateOrCreateNutritionalAssessment($maternalRecord, $data['nutritional_assessment'] ?? []);
+            $this->updateOrCreateImmunizationRecord($maternalRecord, $data['immunization_status'] ?? []);
+            $this->updateOrCreatePrenatalSupplementations($maternalRecord, $data['prenatal_supplementation'] ?? []);
+            $this->updateOrCreateMicronutrientSupplementations($maternalRecord, $data['micronutrient_supplementation'] ?? []);
+            $this->updateOrCreateHighRiskSupplementations($maternalRecord, $data['high_risk_supplementation'] ?? []);
+            $this->updateOrCreateLaboratoryScreening($maternalRecord, $data['laboratory_screening'] ?? []);
+            $this->updateOrCreatePregnancyOutcome($maternalRecord, $data['pregnancy_outcome'] ?? []);
+            $this->updateOrCreateDeliveryInformation($maternalRecord, $data['delivery_info'] ?? []);
+            $this->updateOrCreatePostnatalCare($maternalRecord, $data['postnatal_care'] ?? []);
+            $this->updateOrCreatePostpartumSupplementation($maternalRecord, $data['postpartum_supplementation'] ?? []);
+            
+            return $maternalRecord->load([
+                'prenatalVisits',
+                'nutritionalAssessment',
+                'immunizationRecord',
+                'prenatalSupplementations',
+                'micronutrientSupplementations',
+                'highRiskSupplementations',
+                'laboratoryScreening',
+                'pregnancyOutcome',
+                'deliveryInformation',
+                'postnatalCare',
+                'postpartumSupplementations',
+                'postpartumIfaCompletions',
+                'postpartumRemark'
+            ]);
+        });
+    }
+
+    // Update or create methods (similar to create but use updateOrCreate)
+    private function updateOrCreatePrenatalVisits(MaternalRecord $record, array $visits): void
+    {
+        // Delete existing visits and recreate
+        $record->prenatalVisits()->delete();
+        $this->createPrenatalVisits($record, $visits);
+    }
+
+    private function updateOrCreateNutritionalAssessment(MaternalRecord $record, array $data): void
+    {
+        if (!empty($data)) {
+            $record->nutritionalAssessment()->updateOrCreate(
+                ['maternal_record_id' => $record->id],
+                [
+                    'height' => $data['height'] ?? null,
+                    'weight_1st_trimester' => $data['weight_1st'] ?? null,
+                    'weight_2nd_trimester' => $data['weight_2nd'] ?? null,
+                    'weight_3rd_trimester' => $data['weight_3rd'] ?? null,
+                    'bmi_1st_trimester' => $data['bmi_1st'] ?? null,
+                    'remarks' => $data['remarks'] ?? null,
+                ]
+            );
+        }
+    }
+
+    private function updateOrCreateImmunizationRecord(MaternalRecord $record, array $data): void
+    {
+        if (!empty($data)) {
+            $record->immunizationRecord()->updateOrCreate(
+                ['maternal_record_id' => $record->id],
+                [
+                    'td1_tt1' => $data['td1_tt1'] ?? null,
+                    'td2_tt2' => $data['td2_tt2'] ?? null,
+                    'td3_tt3' => $data['td3_tt3'] ?? null,
+                    'td4_tt4' => $data['td4_tt4'] ?? null,
+                    'td5_tt5' => $data['td5_tt5'] ?? null,
+                    'fully_immunized_mother' => $data['fully_immunized'] ?? null,
+                    'received_deworming' => $data['received_deworming'] ?? null,
+                ]
+            );
+        }
+    }
+
+    private function updateOrCreatePrenatalSupplementations(MaternalRecord $record, array $data): void
+    {
+        $record->prenatalSupplementations()->delete();
+        $this->createPrenatalSupplementations($record, $data);
+    }
+
+    private function updateOrCreateMicronutrientSupplementations(MaternalRecord $record, array $data): void
+    {
+        $record->micronutrientSupplementations()->delete();
+        $this->createMicronutrientSupplementations($record, $data);
+    }
+
+    private function updateOrCreateHighRiskSupplementations(MaternalRecord $record, array $data): void
+    {
+        $record->highRiskSupplementations()->delete();
+        $this->createHighRiskSupplementations($record, $data);
+    }
+
+    private function updateOrCreateLaboratoryScreening(MaternalRecord $record, array $data): void
+    {
+        if (!empty($data)) {
+            $record->laboratoryScreening()->updateOrCreate(
+                ['maternal_record_id' => $record->id],
+                [
+                    'hepatitis_b_screened' => $data['hepatitis_b']['completed'] ?? false,
+                    'hepatitis_b_date' => $data['hepatitis_b']['date'] ?? null,
+                    'hepatitis_b_result' => $data['hepatitis_b']['result'] ?? null,
+                    'cbc_hgb_hct_screened' => $data['cbc_hgb_hct']['completed'] ?? false,
+                    'cbc_hgb_hct_date' => $data['cbc_hgb_hct']['date'] ?? null,
+                    'cbc_hgb_hct_result' => $data['cbc_hgb_hct']['result'] ?? null,
+                    'gestational_diabetes_screened' => $data['gestational_diabetes']['completed'] ?? false,
+                    'gestational_diabetes_date' => $data['gestational_diabetes']['date'] ?? null,
+                    'gestational_diabetes_result' => $data['gestational_diabetes']['result'] ?? null,
+                ]
+            );
+        }
+    }
+
+    private function updateOrCreatePregnancyOutcome(MaternalRecord $record, array $data): void
+    {
+        if (!empty($data['date_terminated']) || !empty($data['outcome_type'])) {
+            $record->pregnancyOutcome()->updateOrCreate(
+                ['maternal_record_id' => $record->id],
+                [
+                    'date_terminated' => $data['date_terminated'] ?? null,
+                    'outcome_type' => $data['outcome_type'] ?? null,
+                    'remarks_action_taken' => $data['remarks'] ?? null,
+                ]
+            );
+        }
+    }
+
+    private function updateOrCreateDeliveryInformation(MaternalRecord $record, array $data): void
+    {
+        if (!empty($data)) {
+            $record->deliveryInformation()->updateOrCreate(
+                ['maternal_record_id' => $record->id],
+                [
+                    'delivery_type' => $data['delivery_type'] ?? null,
+                    'birth_weight' => $data['birth_weight'] ?? null,
+                    'weight_category' => $data['weight_category'] ?? null,
+                    'health_facility_type' => $data['place_of_delivery']['health_facility']['type'] ?? null,
+                    'health_facility_capable' => $data['place_of_delivery']['health_facility']['capable'] ?? null,
+                    'non_health_facility' => $data['place_of_delivery']['non_health_facility'] ?? null,
+                    'birth_attendant' => $data['birth_attendant'] ?? null,
+                    'delivery_date' => $data['delivery_date'] ?? null,
+                    'delivery_time' => $data['delivery_time'] ?? null,
+                ]
+            );
+        }
+    }
+
+    private function updateOrCreatePostnatalCare(MaternalRecord $record, array $data): void
+    {
+        if (!empty($data)) {
+            $record->postnatalCare()->updateOrCreate(
+                ['maternal_record_id' => $record->id],
+                [
+                    'contact_1' => $data['contact_1'] ?? null,
+                    'contact_2' => $data['contact_2'] ?? null,
+                    'contact_3' => $data['contact_3'] ?? null,
+                    'contact_4' => $data['contact_4'] ?? null,
+                    'completed_4pnc' => $data['completed_4pnc'] ?? false,
+                ]
+            );
+        }
+    }
+
+    private function updateOrCreatePostpartumSupplementation(MaternalRecord $record, array $data): void
+    {
+        $record->postpartumSupplementations()->delete();
+        $record->postpartumIfaCompletions()->delete();
+        $record->postpartumRemark()->delete();
+        $this->createPostpartumSupplementation($record, $data);
+    }
+
     private function createMainRecord(array $data, int $userId): MaternalRecord
     {
         return MaternalRecord::create([

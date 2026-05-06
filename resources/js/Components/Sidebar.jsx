@@ -34,8 +34,8 @@ export default function Sidebar({
     };
 
     // Pass collapsed state to children
-    const childrenWithProps = Children.map(children, (child) => {
-        if (child && typeof child === "object" && "type" in child) {
+    const childrenWithProps = Children.map(children, child => {
+        if (child && typeof child === 'object' && 'type' in child) {
             return cloneElement(child, { collapsed: !isOpen });
         }
         return child;

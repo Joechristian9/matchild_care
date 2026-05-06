@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 
 class ChildImmunizationController extends Controller
@@ -22,12 +23,17 @@ class ChildImmunizationController extends Controller
     }
     /**
      * Display a listing of the resource.
+     * Optimized: Only select needed columns and use eager loading
      */
     public function index()
     {
-        $records = Child::with([
-                'maternalRecord',
-                'childImmunizationRecord',
+        $records = Child::select([
+                'id', 'maternal_record_id', 'family_serial', 'first_name', 'last_name', 
+                'sex', 'date_of_birth', 'address'
+            ])
+            ->with([
+                'maternalRecord:id,first_name,last_name,middle_initial,family_serial,address',
+                'childImmunizationRecord:id,child_id,fully_immunized_child',
             ])
             ->latest()
             ->get()
@@ -310,5 +316,48 @@ class ChildImmunizationController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    /**
+     * Generate bulk PDF for all child immunization records
+     */
+    public function generateBulkPdf()
+    {
+        try {
+            $records = Child::with([
+                'maternalRecord',
+                'maternalRecord.immunizationRecord',
+                'childImmunizationRecord'
+            ])
+            ->orderBy('date_of_birth', 'desc')
+            ->get();
+
+            $pdf = Pdf::loadView('pdf.child-immunization-bulk', compact('records'))
+                ->setPaper('legal', 'landscape')
+                ->setOptions([
+                    'isHtml5ParserEnabled' => true,
+                    'isRemoteEnabled' => true,
+                    'defaultFont' => 'sans-serif'
+                ]);
+
+            $filename = 'Child_Immunization_Target_List_' . date('Y-m-d') . '.pdf';
+            return $pdf->download($filename);
+
+        } catch (\Exception $e) {
+            Log::error('Failed to generate child immunization bulk PDF', [
+                'error' => $e->getMessage(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            // Return JSON error for debugging
+            return response()->json([
+                'error' => 'Failed to generate PDF',
+                'message' => $e->getMessage(),
+                'line' => $e->getLine(),
+                'file' => basename($e->getFile())
+            ], 500);
+        }
     }
 }

@@ -4,6 +4,9 @@ import { Head, useForm, usePage } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import Stepper from '@/Components/Stepper';
 import FormNavigation from '@/Components/FormNavigation';
+import Breadcrumb from '@/Components/Breadcrumb';
+import Toast from '@/Components/Toast';
+// Force reload
 import BasicInformationStep from '@/Components/MaternalCare/BasicInformationStep';
 import MedicalInformationStep from '@/Components/MaternalCare/MedicalInformationStep';
 import PrenatalCheckupsStep from '@/Components/MaternalCare/PrenatalCheckupsStep';
@@ -11,63 +14,94 @@ import AdditionalInformationStep from '@/Components/MaternalCare/AdditionalInfor
 import SupplementationScreeningStep from '@/Components/MaternalCare/SupplementationScreeningStep';
 import DeliveryPostnatalStep from '@/Components/MaternalCare/DeliveryPostnatalStep';
 
-export default function MaternalCare() {
-    const { auth, flash } = usePage().props;
+export default function MaternalCare({ nextFamilySerial, record = null, isEdit = false }) {
+    const { flash } = usePage().props;
     const [currentStep, setCurrentStep] = useState(1);
-    const [showSuccess, setShowSuccess] = useState(false);
+    const [showToast, setShowToast] = useState(false);
+    const [toastMessage, setToastMessage] = useState('');
+    const [toastType, setToastType] = useState('success');
     const totalSteps = 6;
     
     // Determine which layout to use based on user role
     const Layout = auth.user.roles.includes('admin') ? AdminLayout : HealthWorkerLayout;
 
-    const { data, setData, post, processing, errors, reset } = useForm({
-        date_of_registration: new Date().toISOString().split('T')[0],
-        family_serial: '',
-        last_name: '',
-        first_name: '',
-        middle_initial: '',
-        address: '',
-        age: '',
-        age_group: '',
+    const { data, setData, post, put, processing, errors, reset } = useForm({
+        date_of_registration: record?.date_of_registration || new Date().toISOString().split('T')[0],
+        family_serial: record?.family_serial || nextFamilySerial || '',
+        last_name: record?.last_name || '',
+        first_name: record?.first_name || '',
+        middle_initial: record?.middle_initial || '',
+        address: record?.address || '',
+        age: record?.age || '',
+        age_group: record?.age_group || '',
 
-        last_menstrual_period: '',
-        gravida: '',
-        parity: '',
-        expected_date_of_delivery: '',
+        last_menstrual_period: record?.last_menstrual_period || '',
+        gravida: record?.gravida || '',
+        parity: record?.parity || '',
+        expected_date_of_delivery: record?.expected_date_of_delivery || '',
 
-        visits: {
+        visits: record?.prenatal_visits?.reduce((acc, visit) => {
+            acc[`visit_${visit.visit_number}`] = visit.visit_date || '';
+            return acc;
+        }, {
+            visit_1: '', visit_2: '', visit_3: '', visit_4: '',
+            visit_5: '', visit_6: '', visit_7: '', visit_8: '',
+        }) || {
             visit_1: '', visit_2: '', visit_3: '', visit_4: '',
             visit_5: '', visit_6: '', visit_7: '', visit_8: '',
         },
 
-        nutritional_assessment: {
+        nutritional_assessment: record?.nutritional_assessment ? {
+            height: record.nutritional_assessment.height || '',
+            weight_1st: record.nutritional_assessment.weight_1st_trimester || '',
+            weight_2nd: record.nutritional_assessment.weight_2nd_trimester || '',
+            weight_3rd: record.nutritional_assessment.weight_3rd_trimester || '',
+            bmi_1st: record.nutritional_assessment.bmi_1st_trimester || '',
+            remarks: record.nutritional_assessment.remarks || '',
+        } : {
             height: '', weight_1st: '', weight_2nd: '',
             weight_3rd: '', bmi_1st: '', remarks: '',
         },
 
-        immunization_status: {
+        immunization_status: record?.immunization_record ? {
+            td1_tt1: record.immunization_record.td1_tt1 || '',
+            td2_tt2: record.immunization_record.td2_tt2 || '',
+            td3_tt3: record.immunization_record.td3_tt3 || '',
+            td4_tt4: record.immunization_record.td4_tt4 || '',
+            td5_tt5: record.immunization_record.td5_tt5 || '',
+            fully_immunized: record.immunization_record.fully_immunized_status || '',
+            received_deworming: record.immunization_record.deworming_date || '',
+        } : {
             td1_tt1: '', td2_tt2: '', td3_tt3: '',
             td4_tt4: '', td5_tt5: '',
             fully_immunized: '', received_deworming: '',
         },
 
         prenatal_supplementation: {
-            iron_folic_acid: Array(6).fill({ date: '', tablets: '' }),
+            iron_folic_acid: record?.prenatal_supplementations?.length > 0
+                ? record.prenatal_supplementations.map(s => ({ date: s.supplementation_date || '', tablets: s.tablets_given || '' }))
+                : Array(6).fill({ date: '', tablets: '' }),
         },
 
         micronutrient_supplementation: {
-            completed: false,
-            visits: Array(6).fill({ date: '', tablets: '' }),
+            completed: record?.micronutrient_supplementations?.[0]?.completed_mms_supplementation || false,
+            visits: record?.micronutrient_supplementations?.length > 0
+                ? record.micronutrient_supplementations.map(s => ({ date: s.supplementation_date || '', tablets: s.tablets_given || '' }))
+                : Array(6).fill({ date: '', tablets: '' }),
         },
 
         high_risk_supplementation: {
-            completed: false,
-            visits: Array(4).fill({ date: '', tablets: '' }),
+            completed: record?.high_risk_supplementations?.[0]?.completed_calcium_supplementation || false,
+            visits: record?.high_risk_supplementations?.length > 0
+                ? record.high_risk_supplementations.map(s => ({ date: s.supplementation_date || '', tablets: s.tablets_given || '' }))
+                : Array(4).fill({ date: '', tablets: '' }),
         },
 
         postpartum_supplementation: {
-            completed_ifa: false,
-            visits: Array(3).fill({ date: '', tablets: '' }),
+            completed_ifa: record?.postpartum_supplementations?.[0]?.completed_ifa || false,
+            visits: record?.postpartum_supplementations?.length > 0
+                ? record.postpartum_supplementations.map(s => ({ date: s.visit_date || '', tablets: s.tablets_given || '' }))
+                : Array(3).fill({ date: '', tablets: '' }),
             completed_ifa_1st: '',
             date_completed_1st: '',
             completed_ifa_2nd: '',
@@ -75,19 +109,65 @@ export default function MaternalCare() {
             remarks: '',
         },
 
-        laboratory_screening: {
+        laboratory_screening: record?.laboratory_screening ? {
+            hepatitis_b: {
+                completed: record.laboratory_screening.completed_hepatitis_b || false,
+                date: record.laboratory_screening.hepatitis_b_date || '',
+                result: record.laboratory_screening.hepatitis_b_result || ''
+            },
+            cbc_hgb_hct: {
+                completed: record.laboratory_screening.completed_cbc_hgb_hct || false,
+                date: record.laboratory_screening.cbc_hgb_hct_date || '',
+                result: record.laboratory_screening.cbc_hgb_hct_result || ''
+            },
+            gestational_diabetes: {
+                completed: record.laboratory_screening.completed_gestational_diabetes || false,
+                date: record.laboratory_screening.gestational_diabetes_date || '',
+                result: record.laboratory_screening.gestational_diabetes_result || ''
+            },
+            syphilis: {
+                completed: record.laboratory_screening.completed_syphilis || false,
+                date: record.laboratory_screening.syphilis_date || '',
+                result: record.laboratory_screening.syphilis_result || ''
+            },
+            hiv: {
+                completed: record.laboratory_screening.completed_hiv || false,
+                date: record.laboratory_screening.hiv_date || '',
+                result: record.laboratory_screening.hiv_result || ''
+            },
+        } : {
             hepatitis_b: { completed: false, date: '', result: '' },
             cbc_hgb_hct: { completed: false, date: '', result: '' },
             gestational_diabetes: { completed: false, date: '', result: '' },
+            syphilis: { completed: false, date: '', result: '' },
+            hiv: { completed: false, date: '', result: '' },
         },
 
-        pregnancy_outcome: {
+        pregnancy_outcome: record?.pregnancy_outcome ? {
+            date_terminated: record.pregnancy_outcome.date_terminated || '',
+            outcome_type: record.pregnancy_outcome.outcome_type || '',
+            remarks: record.pregnancy_outcome.remarks_action_taken || '',
+        } : {
             date_terminated: '',
             outcome_type: '',
             remarks: '',
         },
 
-        delivery_info: {
+        delivery_info: record?.delivery_information ? {
+            delivery_type: record.delivery_information.delivery_type || '',
+            birth_weight: record.delivery_information.birth_weight || '',
+            weight_category: record.delivery_information.weight_category || '',
+            place_of_delivery: {
+                health_facility: {
+                    type: record.delivery_information.health_facility_type || '',
+                    capable: record.delivery_information.health_facility_capable || ''
+                },
+                non_health_facility: record.delivery_information.non_health_facility || '',
+            },
+            birth_attendant: record.delivery_information.birth_attendant || '',
+            delivery_date: record.delivery_information.delivery_date || '',
+            delivery_time: record.delivery_information.delivery_time || '',
+        } : {
             delivery_type: '',
             birth_weight: '',
             weight_category: '',
@@ -100,7 +180,13 @@ export default function MaternalCare() {
             delivery_time: '',
         },
 
-        postnatal_care: {
+        postnatal_care: record?.postnatal_care ? {
+            contact_1: record.postnatal_care.contact_1 || '',
+            contact_2: record.postnatal_care.contact_2 || '',
+            contact_3: record.postnatal_care.contact_3 || '',
+            contact_4: record.postnatal_care.contact_4 || '',
+            completed_4pnc: record.postnatal_care.completed_4pnc || false,
+        } : {
             contact_1: '',
             contact_2: '',
             contact_3: '',
@@ -111,8 +197,30 @@ export default function MaternalCare() {
 
     const calculateEDD = (lmpDate) => {
         if (!lmpDate) return '';
+        
         const lmp = new Date(lmpDate);
-        const edd = new Date(lmp.setDate(lmp.getDate() + 280));
+        const lmpMonth = lmp.getMonth() + 1; // getMonth() returns 0-11, so add 1
+        const lmpDay = lmp.getDate();
+        const lmpYear = lmp.getFullYear();
+        
+        let eddMonth, eddDay, eddYear;
+        
+        // Naegele's Rule
+        if (lmpMonth >= 1 && lmpMonth <= 3) {
+            // January-March: Add 9 months, add 7 days
+            eddMonth = lmpMonth + 9;
+            eddDay = lmpDay + 7;
+            eddYear = lmpYear;
+        } else {
+            // April-December: Subtract 3 months, add 7 days, add 1 year
+            eddMonth = lmpMonth - 3;
+            eddDay = lmpDay + 7;
+            eddYear = lmpYear + 1;
+        }
+        
+        // Handle day overflow (e.g., if day becomes 32)
+        const edd = new Date(eddYear, eddMonth - 1, eddDay); // month is 0-indexed in Date constructor
+        
         return edd.toISOString().split('T')[0];
     };
 
@@ -135,10 +243,16 @@ export default function MaternalCare() {
         }
     }, [data.age]);
 
+    // Handle flash messages from server
     useEffect(() => {
         if (flash?.success) {
-            setShowSuccess(true);
-            setTimeout(() => setShowSuccess(false), 5000);
+            setToastMessage(flash.success);
+            setToastType('success');
+            setShowToast(true);
+        } else if (flash?.error) {
+            setToastMessage(flash.error);
+            setToastType('error');
+            setShowToast(true);
         }
     }, [flash]);
 
@@ -162,14 +276,49 @@ export default function MaternalCare() {
     };
 
     const handleSubmit = (e) => {
-        e.preventDefault();
+        if (e && e.preventDefault) {
+            e.preventDefault();
+        }
         if (currentStep === totalSteps) {
-            post(route('parent.maternal-care.store'), {
-                onSuccess: () => {
-                    reset();
-                    setCurrentStep(1);
-                },
-            });
+            console.log('Submitting form data:', data);
+            
+            if (isEdit && record?.id) {
+                // Update existing record
+                put(route('parent.maternal-care.update', record.id), {
+                    onSuccess: () => {
+                        console.log('Form updated successfully');
+                        setToastMessage('Maternal care record updated successfully!');
+                        setToastType('success');
+                        setShowToast(true);
+                        scrollToTop();
+                    },
+                    onError: (errors) => {
+                        console.error('Form update errors:', errors);
+                        setToastMessage('Failed to update record. Please check the form and try again.');
+                        setToastType('error');
+                        setShowToast(true);
+                    },
+                });
+            } else {
+                // Create new record
+                post(route('parent.maternal-care.store'), {
+                    onSuccess: () => {
+                        console.log('Form submitted successfully');
+                        setToastMessage('Maternal care record created successfully!');
+                        setToastType('success');
+                        setShowToast(true);
+                        reset();
+                        setCurrentStep(1);
+                        scrollToTop();
+                    },
+                    onError: (errors) => {
+                        console.error('Form submission errors:', errors);
+                        setToastMessage('Failed to save record. Please check the form and try again.');
+                        setToastType('error');
+                        setShowToast(true);
+                    },
+                });
+            }
         }
     };
 
@@ -183,14 +332,24 @@ export default function MaternalCare() {
     ];
 
     return (
-        <Layout
+        <AuthenticatedLayout
             header={
-                <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Maternal Care Registration
-                </h2>
+                <Breadcrumb
+                    items={[
+                        {
+                            label: 'Maternal Care Registration',
+                            href: route('parent.maternal-care'),
+                            bold: true,
+                        },
+                        {
+                            label: steps[currentStep - 1]?.title,
+                            href: null,
+                        },
+                    ]}
+                />
             }
         >
-            <Head title="Maternal Care" />
+            <Head title={isEdit ? "Edit Maternal Care Record" : "Maternal Care"} />
 
             {/* Success Message */}
             {showSuccess && (
@@ -231,7 +390,7 @@ export default function MaternalCare() {
                                 }}
                             >
 
-                                {currentStep === 1 && <BasicInformationStep data={data} setData={setData} errors={errors} />}
+                                {currentStep === 1 && <BasicInformationStep data={data} setData={setData} errors={errors} isEdit={isEdit} />}
                                 {currentStep === 2 && <MedicalInformationStep data={data} setData={setData} errors={errors} />}
                                 {currentStep === 3 && <PrenatalCheckupsStep data={data} setData={setData} />}
                                 {currentStep === 4 && <AdditionalInformationStep data={data} setData={setData} />}
@@ -245,6 +404,7 @@ export default function MaternalCare() {
                                         totalSteps={totalSteps}
                                         onPrevious={prevStep}
                                         onNext={nextStep}
+                                        onSubmit={handleSubmit}
                                         processing={processing}
                                         submitLabel="Submit Registration"
                                     />
@@ -255,6 +415,15 @@ export default function MaternalCare() {
                     </div>
                 </div>
             </div>
-        </Layout>
+
+            {/* Toast Notification */}
+            <Toast
+                message={toastMessage}
+                type={toastType}
+                show={showToast}
+                onClose={() => setShowToast(false)}
+                duration={5000}
+            />
+        </AuthenticatedLayout>
     );
 }
