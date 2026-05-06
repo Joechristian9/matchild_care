@@ -1,5 +1,5 @@
 import { Link, usePage } from '@inertiajs/react';
-import { Home, FileText, Settings, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
+import { Home, FileText, Bell, Settings, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
 
 export default function PatientSidebar({ isCollapsed, setIsCollapsed, onNavigate }) {
@@ -9,6 +9,7 @@ export default function PatientSidebar({ isCollapsed, setIsCollapsed, onNavigate
     const navigation = [
         { name: 'Dashboard', href: route('patient.dashboard'), icon: Home },
         { name: 'My Records', href: route('patient.my-records'), icon: FileText },
+        { name: 'Notifications', href: route('patient.notifications'), icon: Bell },
     ];
 
     const handleNavClick = () => {

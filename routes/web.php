@@ -53,6 +53,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:patient')->prefix('patient')->name('patient.')->group(function () {
         Route::get('/dashboard', [PatientController::class, 'dashboard'])->name('dashboard');
         Route::get('/my-records', [PatientController::class, 'myRecords'])->name('my-records');
+        Route::get('/notifications', [PatientController::class, 'notifications'])->name('notifications');
     });
     
     // Health Worker & Admin Routes

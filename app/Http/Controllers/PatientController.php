@@ -79,4 +79,36 @@ class PatientController extends Controller
             'records' => $records,
         ]);
     }
+
+    public function notifications()
+    {
+        $user = auth()->user();
+        
+        // Get maternal record for the logged-in patient
+        $maternalRecord = MaternalRecord::where('user_id', $user->id)
+            ->with([
+                'prenatalVisits',
+                'immunizationRecord',
+            ])
+            ->first();
+
+        return Inertia::render('Patient/Notifications', [
+            'maternalRecord' => $maternalRecord ? [
+                'id' => $maternalRecord->id,
+                'first_name' => $maternalRecord->first_name,
+                'last_name' => $maternalRecord->last_name,
+                'lmp' => $maternalRecord->last_menstrual_period->format('Y-m-d'),
+                'edc' => $maternalRecord->expected_date_of_delivery,
+                'prenatal_visits' => $maternalRecord->prenatalVisits->map(function($visit) {
+                    return [
+                        'visit_date' => $visit->visit_date ? $visit->visit_date->format('Y-m-d') : 'Scheduled',
+                    ];
+                }),
+                'immunization_records' => $maternalRecord->immunizationRecord ? [[
+                    'vaccine_type' => 'Tetanus Toxoid',
+                    'date_given' => $maternalRecord->immunizationRecord->created_at->format('Y-m-d'),
+                ]] : [],
+            ] : null,
+        ]);
+    }
 }
