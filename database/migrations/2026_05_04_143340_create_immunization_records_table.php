@@ -23,7 +23,7 @@ return new class extends Migration
             // Y=Yes, N=No, X=Unknown
             $table->date('deworming_date')->nullable();
             $table->timestamps();
-            
+
             $table->unique('maternal_record_id');
         });
     }

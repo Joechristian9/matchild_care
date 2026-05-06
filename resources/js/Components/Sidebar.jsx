@@ -1,18 +1,18 @@
-import { useState, useEffect, cloneElement, Children } from 'react';
-import { Link } from '@inertiajs/react';
-import { Transition } from '@headlessui/react';
+import { useState, useEffect, cloneElement, Children } from "react";
+import { Link } from "@inertiajs/react";
+import { Transition } from "@headlessui/react";
 
-export default function Sidebar({ 
-    children, 
-    header, 
+export default function Sidebar({
+    children,
+    header,
     footer,
     defaultOpen = true,
-    position = 'left',
-    width = 'w-64',
-    collapsedWidth = 'w-20',
-    className = '',
+    position = "left",
+    width = "w-64",
+    collapsedWidth = "w-20",
+    className = "",
     onToggle,
-    userInitial = 'U'
+    userInitial = "U",
 }) {
     const [isOpen, setIsOpen] = useState(defaultOpen);
     const [isHovering, setIsHovering] = useState(false);
@@ -29,13 +29,13 @@ export default function Sidebar({
     }, [isOpen, onToggle]);
 
     const positionClasses = {
-        left: 'left-0',
-        right: 'right-0'
+        left: "left-0",
+        right: "right-0",
     };
 
     // Pass collapsed state to children
-    const childrenWithProps = Children.map(children, child => {
-        if (child && typeof child === 'object' && 'type' in child) {
+    const childrenWithProps = Children.map(children, (child) => {
+        if (child && typeof child === "object" && "type" in child) {
             return cloneElement(child, { collapsed: !isOpen });
         }
         return child;
@@ -70,7 +70,7 @@ export default function Sidebar({
                     z-50 lg:z-30
                     flex-shrink-0
                     ${isOpen ? width : collapsedWidth}
-                    ${!isOpen && 'lg:flex hidden'}
+                    ${!isOpen && "lg:flex hidden"}
                     ${className}
                     shadow-lg lg:shadow-none
                 `}
@@ -88,13 +88,13 @@ export default function Sidebar({
                         transition-all duration-200
                         focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2
                         transform hover:scale-110
-                        ${isHovering ? 'opacity-100' : 'opacity-0 lg:opacity-100'}
+                        ${isHovering ? "opacity-100" : "opacity-0 lg:opacity-100"}
                     `}
-                    aria-label={isOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+                    aria-label={isOpen ? "Collapse sidebar" : "Expand sidebar"}
                 >
                     <svg
                         className={`w-4 h-4 text-gray-600 transition-transform duration-300 ${
-                            isOpen ? 'rotate-0' : 'rotate-180'
+                            isOpen ? "rotate-0" : "rotate-180"
                         }`}
                         fill="none"
                         stroke="currentColor"
@@ -104,7 +104,11 @@ export default function Sidebar({
                             strokeLinecap="round"
                             strokeLinejoin="round"
                             strokeWidth={2.5}
-                            d={position === 'left' ? 'M15 19l-7-7 7-7' : 'M9 5l7 7-7 7'}
+                            d={
+                                position === "left"
+                                    ? "M15 19l-7-7 7-7"
+                                    : "M9 5l7 7-7 7"
+                            }
                         />
                     </svg>
                 </button>
@@ -128,8 +132,18 @@ export default function Sidebar({
                             {!isOpen && (
                                 <div className="flex justify-center">
                                     <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-xl shadow-md flex items-center justify-center">
-                                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                        <svg
+                                            className="w-6 h-6 text-white"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                                            />
                                         </svg>
                                     </div>
                                 </div>
@@ -163,14 +177,14 @@ export default function Sidebar({
 }
 
 // Sidebar Item Component
-export function SidebarItem({ 
-    href, 
-    icon, 
-    label, 
-    active = false, 
+export function SidebarItem({
+    href,
+    icon,
+    label,
+    active = false,
     badge,
     onClick,
-    collapsed = false 
+    collapsed = false,
 }) {
     const [showTooltip, setShowTooltip] = useState(false);
 
@@ -178,18 +192,20 @@ export function SidebarItem({
         group relative flex items-center gap-3 px-3 py-2.5 rounded-xl
         transition-all duration-200
         text-sm font-medium
-        ${collapsed ? 'justify-center' : ''}
+        ${collapsed ? "justify-center" : ""}
         transform hover:scale-[1.02]
     `;
 
     const activeClasses = active
-        ? 'bg-gradient-to-r from-indigo-500 to-indigo-600 text-white shadow-md shadow-indigo-200'
-        : 'text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 hover:shadow-sm';
+        ? "bg-gradient-to-r from-indigo-500 to-indigo-600 text-white shadow-md shadow-indigo-200"
+        : "text-gray-700 hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 hover:shadow-sm";
 
     const content = (
         <>
             {icon && (
-                <span className={`flex-shrink-0 w-5 h-5 transition-transform duration-200 ${active ? '' : 'group-hover:scale-110'}`}>
+                <span
+                    className={`flex-shrink-0 w-5 h-5 transition-transform duration-200 ${active ? "" : "group-hover:scale-110"}`}
+                >
                     {icon}
                 </span>
             )}
@@ -207,18 +223,21 @@ export function SidebarItem({
                 </Transition>
             )}
             {!collapsed && badge && (
-                <span className={`
+                <span
+                    className={`
                     flex-shrink-0 px-2 py-0.5 text-xs font-semibold rounded-full
-                    ${active 
-                        ? 'bg-white/20 text-white' 
-                        : 'bg-indigo-100 text-indigo-600'
+                    ${
+                        active
+                            ? "bg-white/20 text-white"
+                            : "bg-indigo-100 text-indigo-600"
                     }
                     transition-all duration-200
-                `}>
+                `}
+                >
                     {badge}
                 </span>
             )}
-            
+
             {/* Tooltip for collapsed state */}
             {collapsed && showTooltip && (
                 <div className="absolute left-full ml-2 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg shadow-lg whitespace-nowrap z-50 pointer-events-none">
@@ -265,8 +284,8 @@ export function SidebarItem({
 // Sidebar Group Component
 export function SidebarGroup({ title, children, collapsed = false }) {
     // Pass collapsed state to children
-    const childrenWithProps = Children.map(children, child => {
-        if (child && typeof child === 'object' && 'type' in child) {
+    const childrenWithProps = Children.map(children, (child) => {
+        if (child && typeof child === "object" && "type" in child) {
             return cloneElement(child, { collapsed });
         }
         return child;
@@ -292,9 +311,7 @@ export function SidebarGroup({ title, children, collapsed = false }) {
                     <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 bg-indigo-600 rounded-full" />
                 </div>
             )}
-            <div className="space-y-1">
-                {childrenWithProps}
-            </div>
+            <div className="space-y-1">{childrenWithProps}</div>
         </div>
     );
 }

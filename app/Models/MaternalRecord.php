@@ -142,7 +142,10 @@ class MaternalRecord extends Model
     {
         return $this->hasOne(PostnatalCare::class);
     }
-
+    public function children()
+    {
+        return $this->hasMany(Child::class);
+    }
     /**
      * Get the full name attribute.
      */

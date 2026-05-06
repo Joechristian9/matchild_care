@@ -1,0 +1,50 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('children', function (Blueprint $table) {
+            $table->id();
+
+            $table->foreignId('maternal_record_id')
+                ->constrained('maternal_records')
+                ->cascadeOnDelete();
+
+            $table->date('date_of_registration')->nullable();
+            $table->string('family_serial', 50)->nullable();
+
+            $table->string('last_name', 100);
+            $table->string('first_name', 100);
+            $table->string('middle_initial', 2)->nullable();
+
+            $table->enum('sex', ['M', 'F']);
+            $table->date('date_of_birth');
+
+            $table->text('address')->nullable();
+
+            $table->timestamps();
+            $table->softDeletes();
+
+            $table->index('maternal_record_id');
+            $table->index('family_serial');
+            $table->index('date_of_registration');
+            $table->index('date_of_birth');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('children');
+    }
+};

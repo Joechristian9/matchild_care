@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ChildImmunizationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\MaternalCareController;
 use App\Http\Controllers\PatientController;
@@ -40,7 +41,7 @@ Route::get('/dashboard', function () {
             ->whereYear('date_of_registration', now()->year)
             ->count(),
     ];
-    
+
     return Inertia::render('Dashboard', ['stats' => $stats]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
@@ -62,7 +63,17 @@ Route::middleware('auth')->group(function () {
             Route::get('/maternal-care', [MaternalCareController::class, 'index'])->name('maternal-care');
             Route::post('/maternal-care', [MaternalCareController::class, 'store'])->name('maternal-care.store');
         });
+
+    // Parent Services Routes
+    Route::prefix('parent')->name('parent.')->group(function () {
+        Route::get('/maternal-care', [MaternalCareController::class, 'index'])->name('maternal-care');
+        Route::post('/maternal-care', [MaternalCareController::class, 'store'])->name('maternal-care.store');
     });
+    Route::prefix('child')->name('child.')->group(function () {
+        // Child Immunization Routes
+        Route::resource('/immunization', ChildImmunizationController::class);
+    });
+
 });
 
 require __DIR__.'/auth.php';
