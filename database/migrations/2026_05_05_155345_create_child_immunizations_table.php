@@ -18,28 +18,46 @@ return new class extends Migration
                 ->constrained('children')
                 ->cascadeOnDelete();
 
-            $table->date('bcg')->nullable();
-            $table->date('hepatitis_b')->nullable();
+            // Children protected at birth from neonatal tetanus
+            $table->boolean('protected_at_birth_tt2')->default(false);
+            $table->boolean('protected_at_birth_tt3_tt5')->default(false);
 
+            // BCG
+            $table->date('bcg_0_28_days')->nullable();
+            $table->date('bcg_29_days_to_1_year')->nullable();
+
+            // Hepatitis B
+            $table->date('hepa_b_within_24_hours')->nullable();
+            $table->date('hepa_b_more_than_24_hours')->nullable();
+
+            // DPT-Hib-HepB / Pentavalent
             $table->date('pentavalent_1')->nullable();
             $table->date('pentavalent_2')->nullable();
             $table->date('pentavalent_3')->nullable();
 
+            // OPV
             $table->date('opv_1')->nullable();
             $table->date('opv_2')->nullable();
             $table->date('opv_3')->nullable();
 
+            // IPV
             $table->date('ipv_1')->nullable();
             $table->date('ipv_2')->nullable();
 
+            // PCV
             $table->date('pcv_1')->nullable();
             $table->date('pcv_2')->nullable();
             $table->date('pcv_3')->nullable();
 
+            // MMR
             $table->date('mmr_1')->nullable();
             $table->date('mmr_2')->nullable();
 
-            $table->enum('fully_immunized_child', ['Y', 'N'])->nullable();
+            // Status
+            $table->boolean('fic')->default(false); // Fully Immunized Child 0-12 mos
+            $table->boolean('cic')->default(false); // Completely Immunized Child 13-23 mos
+
+            $table->text('remarks_action_taken')->nullable();
 
             $table->timestamps();
 

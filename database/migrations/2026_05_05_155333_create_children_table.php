@@ -12,27 +12,32 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('children', function (Blueprint $table) {
-        $table->id();
+            $table->id();
 
-        $table->foreignId('maternal_record_id')
-            ->constrained('maternal_records')
-            ->onDelete('cascade');
+            $table->foreignId('maternal_record_id')
+                ->constrained('maternal_records')
+                ->cascadeOnDelete();
 
-        $table->string('family_serial', 50)->nullable();
-        $table->string('last_name', 100);
-        $table->string('first_name', 100);
-        $table->string('middle_initial', 2)->nullable();
-        $table->enum('sex', ['M', 'F']);
-        $table->date('date_of_birth');
-        $table->text('address')->nullable();
+            $table->date('date_of_registration')->nullable();
+            $table->string('family_serial', 50)->nullable();
 
-        $table->timestamps();
-        $table->softDeletes();
+            $table->string('last_name', 100);
+            $table->string('first_name', 100);
+            $table->string('middle_initial', 2)->nullable();
 
-        $table->index('maternal_record_id');
-        $table->index('family_serial');
-        $table->index('date_of_birth');
-    });
+            $table->enum('sex', ['M', 'F']);
+            $table->date('date_of_birth');
+
+            $table->text('address')->nullable();
+
+            $table->timestamps();
+            $table->softDeletes();
+
+            $table->index('maternal_record_id');
+            $table->index('family_serial');
+            $table->index('date_of_registration');
+            $table->index('date_of_birth');
+        });
     }
 
     /**

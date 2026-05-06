@@ -6,11 +6,20 @@ use App\Models\Child;
 use App\Models\MaternalRecord;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 
 
 class ChildImmunizationController extends Controller
 {
+    private function formatDate($date): ?string
+    {
+        if (!$date) {
+            return null;
+        }
+
+        return \Carbon\Carbon::parse($date)->format('Y-m-d');
+    }
     /**
      * Display a listing of the resource.
      */
@@ -28,21 +37,26 @@ class ChildImmunizationController extends Controller
                 return [
                     'id' => $child->id,
 
-                    // Child info
                     'child_name' => trim("{$child->last_name}, {$child->first_name}"),
                     'sex' => $child->sex,
                     'date_of_birth' => optional($child->date_of_birth)->format('Y-m-d'),
 
-                    // Mother info
                     'mother_name' => $child->maternalRecord?->full_name,
                     'family_serial' => $child->family_serial ?: $child->maternalRecord?->family_serial,
                     'address' => $child->address ?: $child->maternalRecord?->address,
 
-                    // Immunization status
-                    'fully_immunized' => $immunization?->fully_immunized_child ?? 'N',
+                    'fic' => (bool) ($immunization?->fic ?? false),
+                    'cic' => (bool) ($immunization?->cic ?? false),
 
-                    // Optional: simple progress indicator
-                    'has_record' => $immunization ? true : false,
+                    'immunization_status' => match (true) {
+                        !$immunization => 'No Record',
+                        $immunization->fic && $immunization->cic => 'FIC / CIC',
+                        $immunization->fic => 'FIC',
+                        $immunization->cic => 'CIC',
+                        default => 'Incomplete',
+                    },
+
+                    'has_record' => (bool) $immunization,
                 ];
             });
 
@@ -68,55 +82,61 @@ class ChildImmunizationController extends Controller
                 'label' => "{$record->family_serial} - {$record->full_name}",
             ]);
 
-        $children = Child::with([
-                'maternalRecord',
-                'childImmunizationRecord',
-            ])
-            ->orderBy('last_name')
+        $children = Child::with(['maternalRecord', 'childImmunizationRecord'])
+            ->latest()
             ->get()
             ->map(function ($child) {
                 $immunization = $child->childImmunizationRecord;
 
                 return [
                     'id' => $child->id,
+                    'label' => trim("{$child->last_name}, {$child->first_name}"),
+
                     'maternal_record_id' => $child->maternal_record_id,
+                    'date_of_registration' => optional($child->date_of_registration)->format('Y-m-d'),
+                    'family_serial' => $child->family_serial,
                     'last_name' => $child->last_name,
                     'first_name' => $child->first_name,
                     'middle_initial' => $child->middle_initial,
                     'sex' => $child->sex,
                     'date_of_birth' => optional($child->date_of_birth)->format('Y-m-d'),
+                    'address' => $child->address,
 
-                    'date_of_registration' => optional($child->maternalRecord?->date_of_registration)->format('Y-m-d'),
-                    'family_serial' => $child->family_serial ?: $child->maternalRecord?->family_serial,
                     'mother_name' => $child->maternalRecord?->full_name,
-                    'address' => $child->address ?: $child->maternalRecord?->address,
 
-                    'label' => "{$child->last_name}, {$child->first_name} - {$child->maternalRecord?->full_name}",
+                    'immunization' => $immunization ? [
+                    'bcg_0_28_days' => $immunization->bcg_0_28_days?->format('Y-m-d'),
+                    'bcg_29_days_to_1_year' => $immunization->bcg_29_days_to_1_year?->format('Y-m-d'),
 
-                    'immunization' => [
-                        'bcg' => optional($immunization?->bcg)->format('Y-m-d'),
-                        'hepatitis_b' => optional($immunization?->hepatitis_b)->format('Y-m-d'),
+                    'hepa_b_within_24_hours' => $immunization->hepa_b_within_24_hours?->format('Y-m-d'),
+                    'hepa_b_more_than_24_hours' => $immunization->hepa_b_more_than_24_hours?->format('Y-m-d'),
 
-                        'pentavalent_1' => optional($immunization?->pentavalent_1)->format('Y-m-d'),
-                        'pentavalent_2' => optional($immunization?->pentavalent_2)->format('Y-m-d'),
-                        'pentavalent_3' => optional($immunization?->pentavalent_3)->format('Y-m-d'),
+                    'pentavalent_1' => $immunization->pentavalent_1?->format('Y-m-d'),
+                    'pentavalent_2' => $immunization->pentavalent_2?->format('Y-m-d'),
+                    'pentavalent_3' => $immunization->pentavalent_3?->format('Y-m-d'),
 
-                        'opv_1' => optional($immunization?->opv_1)->format('Y-m-d'),
-                        'opv_2' => optional($immunization?->opv_2)->format('Y-m-d'),
-                        'opv_3' => optional($immunization?->opv_3)->format('Y-m-d'),
+                    'opv_1' => $immunization->opv_1?->format('Y-m-d'),
+                    'opv_2' => $immunization->opv_2?->format('Y-m-d'),
+                    'opv_3' => $immunization->opv_3?->format('Y-m-d'),
 
-                        'ipv_1' => optional($immunization?->ipv_1)->format('Y-m-d'),
-                        'ipv_2' => optional($immunization?->ipv_2)->format('Y-m-d'),
+                    'ipv_1' => $immunization->ipv_1?->format('Y-m-d'),
+                    'ipv_2' => $immunization->ipv_2?->format('Y-m-d'),
 
-                        'pcv_1' => optional($immunization?->pcv_1)->format('Y-m-d'),
-                        'pcv_2' => optional($immunization?->pcv_2)->format('Y-m-d'),
-                        'pcv_3' => optional($immunization?->pcv_3)->format('Y-m-d'),
+                    'pcv_1' => $immunization->pcv_1?->format('Y-m-d'),
+                    'pcv_2' => $immunization->pcv_2?->format('Y-m-d'),
+                    'pcv_3' => $immunization->pcv_3?->format('Y-m-d'),
 
-                        'mmr_1' => optional($immunization?->mmr_1)->format('Y-m-d'),
-                        'mmr_2' => optional($immunization?->mmr_2)->format('Y-m-d'),
+                    'mmr_1' => $immunization->mmr_1?->format('Y-m-d'),
+                    'mmr_2' => $immunization->mmr_2?->format('Y-m-d'),
 
-                        'fully_immunized_child' => $immunization?->fully_immunized_child ?? '',
-                    ],
+                    'protected_at_birth_tt2' => (bool) $immunization->protected_at_birth_tt2,
+                    'protected_at_birth_tt3_tt5' => (bool) $immunization->protected_at_birth_tt3_tt5,
+
+                    'fic' => (bool) $immunization->fic,
+                    'cic' => (bool) $immunization->cic,
+
+                    'remarks_action_taken' => $immunization->remarks_action_taken,
+                ] : [],
                 ];
             });
 
@@ -144,22 +164,38 @@ class ChildImmunizationController extends Controller
             'child_date_of_birth' => ['nullable', 'required_if:mode,new', 'date'],
 
             'immunization' => ['nullable', 'array'],
-            'immunization.bcg' => ['nullable', 'date'],
-            'immunization.hepatitis_b' => ['nullable', 'date'],
+
+            'immunization.protected_at_birth_tt2' => ['nullable', 'boolean'],
+            'immunization.protected_at_birth_tt3_tt5' => ['nullable', 'boolean'],
+
+            'immunization.bcg_0_28_days' => ['nullable', 'date'],
+            'immunization.bcg_29_days_to_1_year' => ['nullable', 'date'],
+
+            'immunization.hepa_b_within_24_hours' => ['nullable', 'date'],
+            'immunization.hepa_b_more_than_24_hours' => ['nullable', 'date'],
+
             'immunization.pentavalent_1' => ['nullable', 'date'],
             'immunization.pentavalent_2' => ['nullable', 'date'],
             'immunization.pentavalent_3' => ['nullable', 'date'],
+
             'immunization.opv_1' => ['nullable', 'date'],
             'immunization.opv_2' => ['nullable', 'date'],
             'immunization.opv_3' => ['nullable', 'date'],
+
             'immunization.ipv_1' => ['nullable', 'date'],
             'immunization.ipv_2' => ['nullable', 'date'],
+
             'immunization.pcv_1' => ['nullable', 'date'],
             'immunization.pcv_2' => ['nullable', 'date'],
             'immunization.pcv_3' => ['nullable', 'date'],
+
             'immunization.mmr_1' => ['nullable', 'date'],
             'immunization.mmr_2' => ['nullable', 'date'],
-            'immunization.fully_immunized_child' => ['nullable', 'in:Y,N'],
+
+            'immunization.fic' => ['nullable', 'boolean'],
+            'immunization.cic' => ['nullable', 'boolean'],
+
+            'immunization.remarks_action_taken' => ['nullable', 'string'],
         ]);
 
         try {
@@ -171,6 +207,7 @@ class ChildImmunizationController extends Controller
 
                     $child = Child::create([
                         'maternal_record_id' => $maternal->id,
+                        'date_of_registration' => now()->toDateString(),
                         'family_serial' => $maternal->family_serial,
                         'last_name' => $validated['child_last_name'],
                         'first_name' => $validated['child_first_name'],
@@ -181,18 +218,60 @@ class ChildImmunizationController extends Controller
                     ]);
                 }
 
+                $immunizationData = collect($validated['immunization'] ?? [])
+                    ->only([
+                        'protected_at_birth_tt2',
+                        'protected_at_birth_tt3_tt5',
+                        'bcg_0_28_days',
+                        'bcg_29_days_to_1_year',
+                        'hepa_b_within_24_hours',
+                        'hepa_b_more_than_24_hours',
+                        'pentavalent_1',
+                        'pentavalent_2',
+                        'pentavalent_3',
+                        'opv_1',
+                        'opv_2',
+                        'opv_3',
+                        'ipv_1',
+                        'ipv_2',
+                        'pcv_1',
+                        'pcv_2',
+                        'pcv_3',
+                        'mmr_1',
+                        'mmr_2',
+                        'fic',
+                        'cic',
+                        'remarks_action_taken',
+                    ])
+                    ->toArray();
+
+                $immunizationData['protected_at_birth_tt2'] =
+                    filter_var($immunizationData['protected_at_birth_tt2'] ?? false, FILTER_VALIDATE_BOOLEAN);
+
+                $immunizationData['protected_at_birth_tt3_tt5'] =
+                    filter_var($immunizationData['protected_at_birth_tt3_tt5'] ?? false, FILTER_VALIDATE_BOOLEAN);
+
+                $immunizationData['fic'] =
+                    filter_var($immunizationData['fic'] ?? false, FILTER_VALIDATE_BOOLEAN);
+
+                $immunizationData['cic'] =
+                    filter_var($immunizationData['cic'] ?? false, FILTER_VALIDATE_BOOLEAN);
+
                 $child->childImmunizationRecord()->updateOrCreate(
                     ['child_id' => $child->id],
-                    $validated['immunization'] ?? []
+                    $immunizationData
                 );
             });
-
             return back()->with([
                 'success' => 'Child immunization record saved successfully.',
                 'toast_key' => uniqid(),
             ]);
         } catch (\Throwable $e) {
-            Log::error('Child Immunization Store Error: ' . $e->getMessage());
+            Log::error('Child Immunization Store Error', [
+                'message' => $e->getMessage(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile(),
+            ]);
 
             return back()->with([
                 'error' => 'Something went wrong while saving the child immunization record.',
