@@ -20,6 +20,8 @@ class DatabaseSeeder extends Seeder
             'name' => 'joe',
             'email' => 'joe@gmail.com',
             'password' => bcrypt('123'),
+        $this->call([
+            RolePermissionSeeder::class,
         ]);
     }
 }
