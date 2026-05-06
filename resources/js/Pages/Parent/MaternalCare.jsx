@@ -3,6 +3,7 @@ import { Head, useForm, usePage } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import Stepper from '@/Components/Stepper';
 import FormNavigation from '@/Components/FormNavigation';
+import Breadcrumb from '@/Components/Breadcrumb';
 import BasicInformationStep from '@/Components/MaternalCare/BasicInformationStep';
 import MedicalInformationStep from '@/Components/MaternalCare/MedicalInformationStep';
 import PrenatalCheckupsStep from '@/Components/MaternalCare/PrenatalCheckupsStep';
@@ -173,7 +174,21 @@ export default function MaternalCare() {
 
     return (
         <AuthenticatedLayout
-            header={<h2 className="text-xl font-semibold text-gray-800">Maternal Care Registration</h2>}
+            header={
+                <Breadcrumb
+                    items={[
+                        {
+                            label: 'Maternal Care Registration',
+                            href: route('parent.maternal-care'),
+                            bold: true,
+                        },
+                        {
+                            label: steps[currentStep - 1]?.title,
+                            href: null,
+                        },
+                    ]}
+                />
+            }
         >
             <Head title="Maternal Care" />
 

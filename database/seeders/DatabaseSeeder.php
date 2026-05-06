@@ -22,9 +22,5 @@ class DatabaseSeeder extends Seeder
             'email' => 'joe@gmail.com',
             'password' => bcrypt('123'),
         ]);
-        $this->call([
-            MaternalRecordSeeder::class,
-            ChildImmunizationSeeder::class,
-        ]);
     }
 }

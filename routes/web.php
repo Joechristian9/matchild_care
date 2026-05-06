@@ -28,14 +28,14 @@ Route::get('/dashboard', function () {
                 $query->whereNull('visit_date');
             })
             ->count(),
-        'recent_registrations' => \App\Models\MaternalRecord::latest()
+        'recent_registrations' => \App\Models\MaternalRecord::orderBy('date_of_registration', 'desc')
             ->take(5)
             ->get(['id', 'first_name', 'last_name', 'date_of_registration', 'age', 'age_group']),
         'this_month' => \App\Models\MaternalRecord::whereMonth('date_of_registration', now()->month)
             ->whereYear('date_of_registration', now()->year)
             ->count(),
     ];
-
+    
     return Inertia::render('Dashboard', ['stats' => $stats]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 
@@ -48,6 +48,8 @@ Route::middleware('auth')->group(function () {
     Route::prefix('parent')->name('parent.')->group(function () {
         Route::get('/maternal-care', [MaternalCareController::class, 'index'])->name('maternal-care');
         Route::post('/maternal-care', [MaternalCareController::class, 'store'])->name('maternal-care.store');
+        // Bulk PDF route
+        Route::get('/maternal-care/bulk-pdf', [MaternalCareController::class, 'generateBulkPdf'])->name('maternal-care.bulk-pdf');
     });
     Route::prefix('child')->name('child.')->group(function () {
         // Child Immunization Routes

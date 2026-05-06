@@ -29,6 +29,12 @@ export default function AuthenticatedLayout({ header, children }) {
     }, [showSettings]);
 
     // Icons
+    const MenuIcon = () => (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+    );
+
     const HomeIcon = () => (
         <svg
             className="w-5 h-5"
@@ -306,7 +312,7 @@ export default function AuthenticatedLayout({ header, children }) {
                         href="/"
                         icon={<HomeIcon />}
                         label="Home"
-                        active={route().current("welcome")}
+                        active={route().current('welcome')}
                     />
                 </SidebarGroup>
 
@@ -315,13 +321,7 @@ export default function AuthenticatedLayout({ header, children }) {
                         href={route("parent.maternal-care")}
                         icon={<MaternalCareIcon />}
                         label="Maternal Care"
-                        active={route().current("parent.maternal-care")}
-                    />
-                    <SidebarItem
-                        href={route("child.immunization.index")}
-                        icon={<MaternalCareIcon />}
-                        label="Child Immunization"
-                        active={route().current("child.immunization.index")}
+                        active={route().current('parent.maternal-care')}
                     />
                 </SidebarGroup>
             </Sidebar>
@@ -330,7 +330,7 @@ export default function AuthenticatedLayout({ header, children }) {
             <div className="flex-1 flex flex-col min-w-0">
                 <main className="flex-1">
                     {header && (
-                        <header className="bg-white shadow sticky top-0 z-10">
+                        <header className="bg-white shadow sticky top-0 z-40">
                             <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
                                 {header}
                             </div>
