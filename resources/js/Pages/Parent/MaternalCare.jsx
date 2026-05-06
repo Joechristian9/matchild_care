@@ -1,4 +1,5 @@
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import AdminLayout from '@/Layouts/AdminLayout';
+import HealthWorkerLayout from '@/Layouts/HealthWorkerLayout';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import Stepper from '@/Components/Stepper';
@@ -11,10 +12,13 @@ import SupplementationScreeningStep from '@/Components/MaternalCare/Supplementat
 import DeliveryPostnatalStep from '@/Components/MaternalCare/DeliveryPostnatalStep';
 
 export default function MaternalCare() {
-    const { flash } = usePage().props;
+    const { auth, flash } = usePage().props;
     const [currentStep, setCurrentStep] = useState(1);
     const [showSuccess, setShowSuccess] = useState(false);
     const totalSteps = 6;
+    
+    // Determine which layout to use based on user role
+    const Layout = auth.user.roles.includes('admin') ? AdminLayout : HealthWorkerLayout;
 
     const { data, setData, post, processing, errors, reset } = useForm({
         date_of_registration: new Date().toISOString().split('T')[0],
@@ -131,6 +135,13 @@ export default function MaternalCare() {
         }
     }, [data.age]);
 
+    useEffect(() => {
+        if (flash?.success) {
+            setShowSuccess(true);
+            setTimeout(() => setShowSuccess(false), 5000);
+        }
+    }, [flash]);
+
     // Scroll to top function
     const scrollToTop = () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -172,10 +183,21 @@ export default function MaternalCare() {
     ];
 
     return (
-        <AuthenticatedLayout
-            header={<h2 className="text-xl font-semibold text-gray-800">Maternal Care Registration</h2>}
+        <Layout
+            header={
+                <h2 className="text-xl font-semibold leading-tight text-gray-800">
+                    Maternal Care Registration
+                </h2>
+            }
         >
             <Head title="Maternal Care" />
+
+            {/* Success Message */}
+            {showSuccess && (
+                <div className="fixed top-4 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg">
+                    {flash.success}
+                </div>
+            )}
 
             {/* Page Background with Gradient */}
             <div className="min-h-screen bg-gradient-to-br from-gray-50 via-indigo-50/30 to-purple-50/20 py-8 lg:py-12">
@@ -233,6 +255,6 @@ export default function MaternalCare() {
                     </div>
                 </div>
             </div>
-        </AuthenticatedLayout>
+        </Layout>
     );
 }

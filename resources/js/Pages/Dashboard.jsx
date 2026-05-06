@@ -1,9 +1,16 @@
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link } from '@inertiajs/react';
+import AdminLayout from '@/Layouts/AdminLayout';
+import HealthWorkerLayout from '@/Layouts/HealthWorkerLayout';
+import { Head, Link, usePage } from '@inertiajs/react';
 
 export default function Dashboard({ stats }) {
+    const { auth } = usePage().props;
+    
+    // Determine which layout to use based on user role
+    const Layout = auth.user.roles.includes('admin') ? AdminLayout : HealthWorkerLayout;
+    const userRole = auth.user.roles.includes('admin') ? 'Admin' : 'Health Worker';
+
     return (
-        <AuthenticatedLayout
+        <Layout
             header={
                 <h2 className="text-xl font-semibold leading-tight text-gray-800">
                     Dashboard
@@ -17,7 +24,7 @@ export default function Dashboard({ stats }) {
                     {/* Welcome Section */}
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg mb-6">
                         <div className="p-6 text-gray-900">
-                            <h3 className="text-lg font-semibold mb-2">Welcome to Maternal Care Management System</h3>
+                            <h3 className="text-lg font-semibold mb-2">Welcome, {auth.user.name} ({userRole})</h3>
                             <p className="text-gray-600">Monitor and manage maternal health records efficiently.</p>
                         </div>
                     </div>
@@ -196,6 +203,6 @@ export default function Dashboard({ stats }) {
                     </div> */}
                 </div>
             </div>
-        </AuthenticatedLayout>
+        </Layout>
     );
 }

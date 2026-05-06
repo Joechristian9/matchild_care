@@ -1,12 +1,24 @@
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head } from '@inertiajs/react';
+import AdminLayout from '@/Layouts/AdminLayout';
+import HealthWorkerLayout from '@/Layouts/HealthWorkerLayout';
+import PatientLayout from '@/Layouts/PatientLayout';
+import { Head, usePage } from '@inertiajs/react';
 import DeleteUserForm from './Partials/DeleteUserForm';
 import UpdatePasswordForm from './Partials/UpdatePasswordForm';
 import UpdateProfileInformationForm from './Partials/UpdateProfileInformationForm';
 
 export default function Edit({ mustVerifyEmail, status }) {
+    const { auth } = usePage().props;
+    
+    // Determine which layout to use based on user role
+    let Layout = HealthWorkerLayout;
+    if (auth.user.roles.includes('admin')) {
+        Layout = AdminLayout;
+    } else if (auth.user.roles.includes('patient')) {
+        Layout = PatientLayout;
+    }
+    
     return (
-        <AuthenticatedLayout
+        <Layout
             header={
                 <h2 className="text-xl font-semibold leading-tight text-gray-800">
                     Profile
@@ -34,6 +46,6 @@ export default function Edit({ mustVerifyEmail, status }) {
                     </div>
                 </div>
             </div>
-        </AuthenticatedLayout>
+        </Layout>
     );
 }
