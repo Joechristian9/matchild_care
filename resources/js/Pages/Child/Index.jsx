@@ -1,7 +1,5 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head, Link } from "@inertiajs/react";
-import { useState, useEffect } from "react";
-import { SkeletonTable } from "@/Components/Skeleton";
 import {
     Plus,
     Baby,

@@ -60,55 +60,26 @@ Route::get('/dashboard', function () {
         'records' => $records
     ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
-
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Patient Routes
-    Route::middleware('role:patient')
-        ->prefix('patient')
-        ->name('patient.')
-        ->group(function () {
-            Route::get('/dashboard', [PatientController::class, 'dashboard'])->name('dashboard');
-            Route::get('/my-records', [PatientController::class, 'myRecords'])->name('my-records');
-            Route::get('/notifications', [PatientController::class, 'notifications'])->name('notifications');
-        });
-
-    // Health Worker & Admin Routes
-    Route::middleware('role:health_worker,admin')->group(function () {
-
-        // Parent Services Routes
-        Route::prefix('parent')
-            ->name('parent.')
-            ->group(function () {
-                Route::get('/maternal-care', [MaternalCareController::class, 'index'])
-                    ->name('maternal-care');
-
-                Route::post('/maternal-care', [MaternalCareController::class, 'store'])
-                    ->name('maternal-care.store');
-
-                Route::get('/maternal-care/bulk-pdf', [MaternalCareController::class, 'generateBulkPdf'])
-                    ->name('maternal-care.bulk-pdf');
-
-                Route::get('/maternal-care/{id}/edit', [MaternalCareController::class, 'edit'])
-                    ->name('maternal-care.edit');
-
-                Route::put('/maternal-care/{id}', [MaternalCareController::class, 'update'])
-                    ->name('maternal-care.update');
-            });
-
-        // Child Services Routes
-        Route::prefix('child')
-            ->name('child.')
-            ->group(function () {
-                Route::get('/immunization/bulk-pdf', [ChildImmunizationController::class, 'generateBulkPdf'])
-                    ->name('immunization.bulk-pdf');
-
-                Route::resource('/immunization', ChildImmunizationController::class);
-            });
+    // Parent Services Routes
+    Route::prefix('parent')->name('parent.')->group(function () {
+        Route::get('/maternal-care', [MaternalCareController::class, 'index'])->name('maternal-care');
+        Route::post('/maternal-care', [MaternalCareController::class, 'store'])->name('maternal-care.store');
+        Route::get('/maternal-care/{id}/edit', [MaternalCareController::class, 'edit'])->name('maternal-care.edit');
+        Route::put('/maternal-care/{id}', [MaternalCareController::class, 'update'])->name('maternal-care.update');
+        // Bulk PDF route
+        Route::get('/maternal-care/bulk-pdf', [MaternalCareController::class, 'generateBulkPdf'])->name('maternal-care.bulk-pdf');
     });
+    Route::prefix('child')->name('child.')->group(function () {
+        // Child Immunization Routes
+        Route::get('/immunization/bulk-pdf', [ChildImmunizationController::class, 'generateBulkPdf'])->name('immunization.bulk-pdf');
+        Route::resource('/immunization', ChildImmunizationController::class);
+    });
+
 });
 
 require __DIR__.'/auth.php';

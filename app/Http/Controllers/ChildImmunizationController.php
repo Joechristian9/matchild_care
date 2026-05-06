@@ -28,12 +28,18 @@ class ChildImmunizationController extends Controller
     public function index()
     {
         $records = Child::select([
-                'id', 'maternal_record_id', 'family_serial', 'first_name', 'last_name', 
-                'sex', 'date_of_birth', 'address'
+                'id',
+                'maternal_record_id',
+                'family_serial',
+                'first_name',
+                'last_name',
+                'sex',
+                'date_of_birth',
+                'address',
             ])
             ->with([
                 'maternalRecord:id,first_name,last_name,middle_initial,family_serial,address',
-                'childImmunizationRecord:id,child_id,fully_immunized_child',
+                'childImmunizationRecord:id,child_id,fic,cic',
             ])
             ->latest()
             ->get()
