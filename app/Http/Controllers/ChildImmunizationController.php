@@ -25,9 +25,9 @@ class ChildImmunizationController extends Controller
      * Display a listing of the resource.
      * Optimized: Only select needed columns and use eager loading
      */
-    public function index()
+    public function index(Request $request)
     {
-        $records = Child::select([
+        $query = Child::select([
                 'id',
                 'maternal_record_id',
                 'family_serial',
@@ -40,10 +40,60 @@ class ChildImmunizationController extends Controller
             ->with([
                 'maternalRecord:id,first_name,last_name,middle_initial,family_serial,address',
                 'childImmunizationRecord:id,child_id,fic,cic',
-            ])
-            ->latest()
-            ->get()
-            ->map(function ($child) {
+            ]);
+
+        // Search functionality
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('first_name', 'like', "%{$search}%")
+                    ->orWhere('last_name', 'like', "%{$search}%")
+                    ->orWhere('family_serial', 'like', "%{$search}%")
+                    ->orWhereHas('maternalRecord', function ($q) use ($search) {
+                        $q->where('first_name', 'like', "%{$search}%")
+                            ->orWhere('last_name', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        // Filter by sex
+        if ($request->filled('sex') && $request->sex !== 'all') {
+            $query->where('sex', $request->sex);
+        }
+
+        // Filter by immunization status
+        if ($request->filled('status') && $request->status !== 'all') {
+            switch ($request->status) {
+                case 'fic_cic':
+                    $query->whereHas('childImmunizationRecord', function ($q) {
+                        $q->where('fic', true)->where('cic', true);
+                    });
+                    break;
+                case 'fic':
+                    $query->whereHas('childImmunizationRecord', function ($q) {
+                        $q->where('fic', true)->where('cic', false);
+                    });
+                    break;
+                case 'cic':
+                    $query->whereHas('childImmunizationRecord', function ($q) {
+                        $q->where('fic', false)->where('cic', true);
+                    });
+                    break;
+                case 'incomplete':
+                    $query->whereHas('childImmunizationRecord', function ($q) {
+                        $q->where('fic', false)->where('cic', false);
+                    });
+                    break;
+                case 'no_record':
+                    $query->doesntHave('childImmunizationRecord');
+                    break;
+            }
+        }
+
+        $records = $query->latest()
+            ->paginate(10)
+            ->withQueryString()
+            ->through(function ($child) {
                 $immunization = $child->childImmunizationRecord;
 
                 return [
@@ -74,6 +124,7 @@ class ChildImmunizationController extends Controller
 
         return Inertia::render('Child/Index', [
             'records' => $records,
+            'filters' => $request->only(['search', 'sex', 'status']),
         ]);
     }
 

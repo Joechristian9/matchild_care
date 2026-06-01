@@ -373,6 +373,13 @@ export default function MaternalCare({
         }
     };
 
+    const goToStep = (stepNumber) => {
+        if (stepNumber >= 1 && stepNumber <= totalSteps) {
+            setCurrentStep(stepNumber);
+            scrollToTop();
+        }
+    };
+
     const handleSubmit = (e) => {
         if (e && e.preventDefault) {
             e.preventDefault();
@@ -513,7 +520,7 @@ export default function MaternalCare({
                     </div>
 
                     {/* Stepper */}
-                    <Stepper steps={steps} currentStep={currentStep} />
+                    <Stepper steps={steps} currentStep={currentStep} onStepClick={goToStep} />
 
                     {/* Form Card */}
                     <div className="bg-white shadow-2xl rounded-3xl border border-gray-200 overflow-hidden">

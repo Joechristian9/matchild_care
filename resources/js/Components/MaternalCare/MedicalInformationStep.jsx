@@ -50,7 +50,14 @@ export default function MedicalInformationStep({ data, setData, errors }) {
                     <InputLabel htmlFor="expected_date_of_delivery" value="EDD" />
                     <div className="relative">
                         <div className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-700">
-                            {data.expected_date_of_delivery || 'Enter Last Menstrual Period to calculate'}
+                            {data.expected_date_of_delivery 
+                                ? new Date(data.expected_date_of_delivery).toLocaleDateString('en-US', { 
+                                    month: '2-digit', 
+                                    day: '2-digit', 
+                                    year: 'numeric' 
+                                })
+                                : 'Enter Last Menstrual Period to calculate'
+                            }
                         </div>
                         <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
                             <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

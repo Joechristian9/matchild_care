@@ -65,6 +65,13 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+    // Patient Routes
+    Route::prefix('patient')->name('patient.')->group(function () {
+        Route::get('/dashboard', [PatientController::class, 'dashboard'])->name('dashboard');
+        Route::get('/my-records', [PatientController::class, 'myRecords'])->name('my-records');
+        Route::get('/notifications', [PatientController::class, 'notifications'])->name('notifications');
+    });
+
     // Parent Services Routes
     Route::prefix('parent')->name('parent.')->group(function () {
         Route::get('/maternal-care', [MaternalCareController::class, 'index'])->name('maternal-care');

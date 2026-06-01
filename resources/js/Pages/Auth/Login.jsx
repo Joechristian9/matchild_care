@@ -6,7 +6,6 @@ import TextInput from "@/Components/TextInput";
 import GuestLayout from "@/Layouts/GuestLayout";
 import { Head, Link, useForm } from "@inertiajs/react";
 import { Mail, LockKeyhole, LogIn, Loader2 } from "lucide-react";
-import { useState } from "react";
 
 export default function Login({ status, canResetPassword }) {
     const { data, setData, post, processing, errors, reset } = useForm({
@@ -14,22 +13,14 @@ export default function Login({ status, canResetPassword }) {
         password: "",
         remember: false,
     });
-    
-    const [isLoggingIn, setIsLoggingIn] = useState(false);
 
     const submit = (e) => {
         e.preventDefault();
-        setIsLoggingIn(true);
 
         post(route("login"), {
             onFinish: () => {
                 reset("password");
-                // Keep loading state for a moment to show transition
-                setTimeout(() => setIsLoggingIn(false), 1000);
             },
-            onError: () => {
-                setIsLoggingIn(false);
-            }
         });
     };
 
@@ -124,9 +115,9 @@ export default function Login({ status, canResetPassword }) {
 
                 <PrimaryButton
                     className="flex w-full items-center justify-center gap-2 rounded-xl bg-violet-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-violet-200 transition hover:bg-violet-700 disabled:opacity-70 disabled:cursor-not-allowed"
-                    disabled={processing || isLoggingIn}
+                    disabled={processing}
                 >
-                    {processing || isLoggingIn ? (
+                    {processing ? (
                         <>
                             <Loader2 className="h-4 w-4 animate-spin" />
                             <span>Signing in...</span>
@@ -139,30 +130,6 @@ export default function Login({ status, canResetPassword }) {
                     )}
                 </PrimaryButton>
             </form>
-
-            {/* Full Page Loading Overlay */}
-            {isLoggingIn && !errors.email && !errors.password && (
-                <div className="fixed inset-0 bg-white/90 backdrop-blur-sm z-50 flex items-center justify-center">
-                    <div className="text-center">
-                        <div className="relative inline-block">
-                            {/* Animated circles */}
-                            <div className="w-20 h-20 border-4 border-pink-200 border-t-pink-600 rounded-full animate-spin"></div>
-                            <div className="absolute inset-0 w-20 h-20 border-4 border-transparent border-b-rose-400 rounded-full animate-spin" style={{ animationDirection: 'reverse', animationDuration: '1s' }}></div>
-                        </div>
-                        <div className="mt-6 space-y-2">
-                            <p className="text-lg font-semibold text-gray-900">Logging you in...</p>
-                            <p className="text-sm text-gray-500">Preparing your dashboard</p>
-                        </div>
-                        
-                        {/* Progress dots */}
-                        <div className="flex items-center justify-center gap-2 mt-4">
-                            <div className="w-2 h-2 bg-pink-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                            <div className="w-2 h-2 bg-pink-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                            <div className="w-2 h-2 bg-pink-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-                        </div>
-                    </div>
-                </div>
-            )}
         </GuestLayout>
     );
 }

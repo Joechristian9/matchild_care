@@ -208,15 +208,6 @@ export default function Dashboard({ stats, records = { data: [] } }) {
     const [searchQuery, setSearchQuery] = useState("");
     const [statusFilter, setStatusFilter] = useState("all");
     const [ageGroupFilter, setAgeGroupFilter] = useState("all");
-    const [isLoading, setIsLoading] = useState(true);
-
-    // Simulate initial loading (remove this in production if using real loading state)
-    useEffect(() => {
-        // Set loading to false after component mounts and data is available
-        if (stats && records) {
-            setIsLoading(false);
-        }
-    }, [stats, records]);
 
     // Update URL when tab changes - useCallback to prevent recreation
     const handleTabChange = useCallback((tab) => {
@@ -286,113 +277,101 @@ export default function Dashboard({ stats, records = { data: [] } }) {
                 <div className="mx-auto max-w-7xl px-2 sm:px-4 lg:px-6">
                     {/* Key Metrics Grid */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                        {isLoading ? (
-                            // Show skeleton loading for metric cards
-                            <>
-                                <SkeletonCard />
-                                <SkeletonCard />
-                                <SkeletonCard />
-                                <SkeletonCard />
-                            </>
-                        ) : (
-                            <>
-                                <MetricCard
-                                    icon={
-                                        <svg
-                                            className="w-8 h-8 text-indigo-600"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                                            />
-                                        </svg>
-                                    }
-                                    badge="Total"
-                                    value={stats?.total_records || 0}
-                                    label="Maternal Records"
-                                    description="All registered patients"
-                                    bgColor="bg-indigo-100"
-                                    badgeColor="text-indigo-600 bg-indigo-50"
-                                />
+                        <MetricCard
+                            icon={
+                                <svg
+                                    className="w-8 h-8 text-indigo-600"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                    />
+                                </svg>
+                            }
+                            badge="Total"
+                            value={stats?.total_records || 0}
+                            label="Maternal Records"
+                            description="All registered patients"
+                            bgColor="bg-indigo-100"
+                            badgeColor="text-indigo-600 bg-indigo-50"
+                        />
 
-                                <MetricCard
-                                    icon={
-                                        <svg
-                                            className="w-8 h-8 text-pink-600"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                                            />
-                                        </svg>
-                                    }
-                                    badge="Active"
-                                    value={stats?.active_pregnancies || 0}
-                                    label="Active Pregnancies"
-                                    description="Ongoing care required"
-                                    bgColor="bg-pink-100"
-                                    badgeColor="text-pink-600 bg-pink-50"
-                                />
+                        <MetricCard
+                            icon={
+                                <svg
+                                    className="w-8 h-8 text-pink-600"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                                    />
+                                </svg>
+                            }
+                            badge="Active"
+                            value={stats?.active_pregnancies || 0}
+                            label="Active Pregnancies"
+                            description="Ongoing care required"
+                            bgColor="bg-pink-100"
+                            badgeColor="text-pink-600 bg-pink-50"
+                        />
 
-                                <MetricCard
-                                    icon={
-                                        <svg
-                                            className="w-8 h-8 text-green-600"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                                            />
-                                        </svg>
-                                    }
-                                    badge="Complete"
-                                    value={stats?.completed_4pnc || 0}
-                                    label="Completed 4PNC"
-                                    description="Postnatal care finished"
-                                    bgColor="bg-green-100"
-                                    badgeColor="text-green-600 bg-green-50"
-                                />
+                        <MetricCard
+                            icon={
+                                <svg
+                                    className="w-8 h-8 text-green-600"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                    />
+                                </svg>
+                            }
+                            badge="Complete"
+                            value={stats?.completed_4pnc || 0}
+                            label="Completed 4PNC"
+                            description="Postnatal care finished"
+                            bgColor="bg-green-100"
+                            badgeColor="text-green-600 bg-green-50"
+                        />
 
-                                <MetricCard
-                                    icon={
-                                        <svg
-                                            className="w-8 h-8 text-blue-600"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                                            />
-                                        </svg>
-                                    }
-                                    badge="New"
-                                    value={stats?.this_month || 0}
-                                    label="This Month"
-                                    description="New registrations"
-                                    bgColor="bg-blue-100"
-                                    badgeColor="text-blue-600 bg-blue-50"
-                                />
-                            </>
-                        )}
+                        <MetricCard
+                            icon={
+                                <svg
+                                    className="w-8 h-8 text-blue-600"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                                    />
+                                </svg>
+                            }
+                            badge="New"
+                            value={stats?.this_month || 0}
+                            label="This Month"
+                            description="New registrations"
+                            bgColor="bg-blue-100"
+                            badgeColor="text-blue-600 bg-blue-50"
+                        />
                     </div>
 
                     {/* Tabs Navigation */}
@@ -424,40 +403,18 @@ export default function Dashboard({ stats, records = { data: [] } }) {
                     {/* Overview Tab Content */}
                     {activeTab === "overview" && (
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                            {isLoading ? (
-                                // Show skeleton loading for overview panels
-                                <>
-                                    <SkeletonPanel items={5} />
-                                    <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-                                        <div className="bg-gradient-to-r from-pink-500 to-rose-500 px-6 py-4">
-                                            <div className="w-32 h-5 bg-white/30 rounded mb-2 animate-pulse"></div>
-                                            <div className="w-48 h-3 bg-white/20 rounded animate-pulse"></div>
-                                        </div>
-                                        <div className="p-6 space-y-4">
-                                            <SkeletonInsightCard />
-                                            <SkeletonInsightCard />
-                                            <SkeletonInsightCard />
-                                            <div className="grid grid-cols-2 gap-3">
-                                                <div className="p-3 rounded-lg bg-gray-100 animate-pulse h-16"></div>
-                                                <div className="p-3 rounded-lg bg-gray-100 animate-pulse h-16"></div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </>
-                            ) : (
-                                <>
-                                    {/* Recent Registrations */}
-                                    <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-                                        <div className="bg-gradient-to-r from-indigo-500 to-purple-500 px-6 py-4">
-                                            <h3 className="text-lg font-bold text-white">
-                                                Recent Registrations
-                                            </h3>
-                                            <p className="text-indigo-100 text-sm">
-                                                Latest maternal care records
-                                            </p>
-                                        </div>
-                                        <div className="p-6">
-                                            <div className="space-y-4">
+                            {/* Recent Registrations */}
+                            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+                                <div className="bg-gradient-to-r from-indigo-500 to-purple-500 px-6 py-4">
+                                    <h3 className="text-lg font-bold text-white">
+                                        Recent Registrations
+                                    </h3>
+                                    <p className="text-indigo-100 text-sm">
+                                        Latest maternal care records
+                                    </p>
+                                </div>
+                                <div className="p-6">
+                                    <div className="space-y-4">
                                                 {stats?.recent_registrations &&
                                                 stats.recent_registrations
                                                     .length > 0 ? (
@@ -662,8 +619,6 @@ export default function Dashboard({ stats, records = { data: [] } }) {
                                             </div>
                                         </div>
                                     </div>
-                                </>
-                            )}
                         </div>
                     )}
 
@@ -741,10 +696,7 @@ export default function Dashboard({ stats, records = { data: [] } }) {
                                 </div>
 
                                 {/* Enhanced Table */}
-                                {isLoading ? (
-                                    <SkeletonTable rows={10} />
-                                ) : (
-                                    <div className="overflow-x-auto rounded-lg border border-gray-200">
+                                <div className="overflow-x-auto rounded-lg border border-gray-200">
                                         <table className="min-w-full divide-y divide-gray-200">
                                             <thead className="bg-gradient-to-r from-pink-50 to-rose-50">
                                                 <tr>
@@ -988,11 +940,9 @@ export default function Dashboard({ stats, records = { data: [] } }) {
                                             </tbody>
                                         </table>
                                     </div>
-                                )}
 
                                 {/* Pagination */}
-                                {!isLoading &&
-                                    records?.data &&
+                                {records?.data &&
                                     records.data.length > 0 && (
                                         <div className="mt-6 flex items-center justify-between border-t border-gray-200 pt-4">
                                             <div className="flex-1 flex justify-between sm:hidden">

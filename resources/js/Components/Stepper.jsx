@@ -1,4 +1,4 @@
-export default function Stepper({ steps, currentStep }) {
+export default function Stepper({ steps, currentStep, onStepClick }) {
     return (
         <div className="mb-10">
             {/* Desktop Stepper */}
@@ -6,7 +6,11 @@ export default function Stepper({ steps, currentStep }) {
                 <div className="flex items-start justify-between relative">
                     {steps.map((step, index) => (
                         <div key={step.number} className="flex items-center flex-1 relative">
-                            <div className="flex flex-col items-center flex-1 relative z-10">
+                            <button
+                                onClick={() => onStepClick && onStepClick(step.number)}
+                                className="flex flex-col items-center flex-1 relative z-10 cursor-pointer group"
+                                type="button"
+                            >
                                 {/* Step Circle */}
                                 <div className={`
                                     relative flex items-center justify-center w-14 h-14 rounded-2xl border-2 
@@ -17,6 +21,7 @@ export default function Stepper({ steps, currentStep }) {
                                         ? 'bg-white border-indigo-300 text-indigo-600 shadow-md'
                                         : 'bg-white border-gray-300 text-gray-400 shadow-sm'
                                     }
+                                    group-hover:scale-110 group-hover:shadow-lg
                                 `}>
                                     {currentStep > step.number ? (
                                         <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -31,16 +36,16 @@ export default function Stepper({ steps, currentStep }) {
                                 <div className="mt-4 text-center max-w-[140px]">
                                     <p className={`text-sm font-semibold leading-tight mb-1 transition-colors ${
                                         currentStep >= step.number ? 'text-indigo-600' : 'text-gray-600'
-                                    }`}>
+                                    } group-hover:text-indigo-600`}>
                                         {step.title}
                                     </p>
                                     <p className={`text-xs leading-tight transition-colors ${
                                         currentStep >= step.number ? 'text-indigo-500' : 'text-gray-500'
-                                    }`}>
+                                    } group-hover:text-indigo-500`}>
                                         {step.description}
                                     </p>
                                 </div>
-                            </div>
+                            </button>
                             
                             {/* Connector Line */}
                             {index < steps.length - 1 && (

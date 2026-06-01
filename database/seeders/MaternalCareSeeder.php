@@ -99,18 +99,27 @@ class MaternalCareSeeder extends Seeder
             $weeksPregnantAtRegistration = rand(8, 16);
             $lmp = $registrationDate->copy()->subWeeks($weeksPregnantAtRegistration);
             
-            // Calculate EDD using Naegele's Rule:
-            // If LMP month is Jan-Mar (1-3): Add 9 months, add 7 days
-            // If LMP month is Apr-Dec (4-12): Subtract 3 months, add 7 days, add 1 year
+            // Calculate EDD using the SAME logic as frontend (Naegele's Rule)
+            // This matches the JavaScript calculateEDD function exactly
             $lmpMonth = (int) $lmp->format('m');
+            $lmpDay = (int) $lmp->format('d');
+            $lmpYear = (int) $lmp->format('Y');
             
             if ($lmpMonth >= 1 && $lmpMonth <= 3) {
                 // January-March: Add 9 months, add 7 days
-                $edd = $lmp->copy()->addMonths(9)->addDays(7);
+                $eddMonth = $lmpMonth + 9;
+                $eddDay = $lmpDay + 7;
+                $eddYear = $lmpYear;
             } else {
                 // April-December: Subtract 3 months, add 7 days, add 1 year
-                $edd = $lmp->copy()->subMonths(3)->addDays(7)->addYear();
+                $eddMonth = $lmpMonth - 3;
+                $eddDay = $lmpDay + 7;
+                $eddYear = $lmpYear + 1;
             }
+            
+            // Create date and let Carbon handle day overflow automatically
+            // This matches how JavaScript Date() handles overflow
+            $edd = Carbon::create($eddYear, $eddMonth, $eddDay);
 
             // Determine age group
             $ageGroup = $personData['age'] <= 14 ? '10-14' : ($personData['age'] <= 19 ? '15-19' : '20-49');
