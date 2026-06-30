@@ -1,8 +1,9 @@
 import InputLabel from '@/Components/InputLabel';
 import TextInput from '@/Components/TextInput';
+import VitalSigns from '@/Components/MaternalCare/VitalSigns';
 import { useMemo } from 'react';
 
-export default function PrenatalCheckupsStep({ data, setData }) {
+export default function PrenatalCheckupsStep({ data, setData, errors }) {
     // Calculate suggested date for next visit (4 weeks after previous visit)
     const getSuggestedDate = (visitNum) => {
         if (visitNum === 1) return null; // No suggestion for first visit
@@ -127,6 +128,9 @@ export default function PrenatalCheckupsStep({ data, setData }) {
                     );
                 })}
             </div>
+
+            {/* VITAL SIGNS */}
+            <VitalSigns data={data} setData={setData} errors={errors} />
 
         </div>
     );

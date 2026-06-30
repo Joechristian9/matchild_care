@@ -30,6 +30,20 @@ class StoreMaternalCareRequest extends FormRequest
             'age' => 'required|integer|min:10|max:49',
             'age_group' => 'required|string|in:10-14,15-19,20-49',
             
+            // Vital Signs
+            'vital_signs' => 'nullable|array',
+            'vital_signs.blood_pressure_systolic' => 'nullable|numeric|min:0|max:300',
+            'vital_signs.blood_pressure_diastolic' => 'nullable|numeric|min:0|max:200',
+            'vital_signs.heart_rate' => 'nullable|numeric|min:0|max:250',
+            'vital_signs.temperature' => 'nullable|numeric|min:30|max:45',
+            'vital_signs.respiratory_rate' => 'nullable|numeric|min:0|max:100',
+            'vital_signs.weight' => 'nullable|numeric|min:0|max:300',
+            'vital_signs.height' => 'nullable|numeric|min:0|max:250',
+            'vital_signs.bmi' => 'nullable|numeric|min:0|max:100',
+            'vital_signs.fetal_heart_tone' => 'nullable|numeric|min:0|max:200',
+            'vital_signs.fundal_height' => 'nullable|numeric|min:0|max:50',
+            'vital_signs.others' => 'nullable|string|max:500',
+            
             // Medical Information
             'last_menstrual_period' => 'required|date',
             'gravida' => 'required|integer|min:1',

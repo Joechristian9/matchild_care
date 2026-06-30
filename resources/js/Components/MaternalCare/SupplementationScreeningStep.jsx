@@ -1,8 +1,9 @@
 import InputLabel from '@/Components/InputLabel';
 import TextInput from '@/Components/TextInput';
 import Checkbox from '@/Components/Checkbox';
+import VitalSigns from '@/Components/MaternalCare/VitalSigns';
 
-export default function SupplementationScreeningStep({ data, setData }) {
+export default function SupplementationScreeningStep({ data, setData, errors }) {
     return (
         <div className="space-y-6">
 
@@ -331,6 +332,9 @@ export default function SupplementationScreeningStep({ data, setData }) {
                     ))}
                 </div>
             </div>
+
+            {/* VITAL SIGNS */}
+            <VitalSigns data={data} setData={setData} errors={errors} />
 
         </div>
     );

@@ -145,6 +145,6 @@ export default function MedicalInformationStep({ data, setData, errors }) {
                 </div>
             </div>
 
-        </div>
+            </div>
     );
 }

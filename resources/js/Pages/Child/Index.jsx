@@ -63,32 +63,11 @@ const StatusBadge = ({ fic, cic, has_record }) => {
     );
 };
 
-const MiniStat = ({ label, value, icon: Icon }) => (
-    <div className="rounded-2xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur-sm">
-        <div className="flex items-center gap-2">
-            <Icon className="h-4 w-4 text-violet-100" />
-            <p className="text-xs font-medium uppercase tracking-wide text-violet-100">
-                {label}
-            </p>
-        </div>
-
-        <p className="mt-2 text-2xl font-bold text-white">{value}</p>
-    </div>
-);
-
 export default function Index({ records = { data: [] }, filters = {} }) {
     const [searchQuery, setSearchQuery] = useState(filters.search || "");
     const [sexFilter, setSexFilter] = useState(filters.sex || "all");
     const [statusFilter, setStatusFilter] = useState(filters.status || "all");
     const [showFilters, setShowFilters] = useState(false);
-
-    const totalRecords = records.total || 0;
-
-    const ficCount = records.data.filter((r) => r.fic).length;
-
-    const cicCount = records.data.filter((r) => r.cic).length;
-
-    const incompleteCount = records.data.filter((r) => !r.fic && !r.cic).length;
 
     // Debounced search
     useEffect(() => {
@@ -165,53 +144,25 @@ export default function Index({ records = { data: [] }, filters = {} }) {
                 <div className="mx-auto max-w-7xl space-y-6 px-4 sm:px-6 lg:px-8">
                     <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-violet-700 via-violet-700 to-purple-700 text-white shadow-xl shadow-violet-100">
                         <div className="p-6">
-                            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-                                <div className="flex items-start gap-4">
-                                    <div className="rounded-3xl bg-white/15 p-4 backdrop-blur-sm">
-                                        <Baby className="h-8 w-8" />
-                                    </div>
-
-                                    <div>
-                                        <h1 className="text-2xl font-bold tracking-tight">
-                                            Child Immunization Records
-                                        </h1>
-
-                                        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-violet-100">
-                                            Track child vaccination history,
-                                            monitor Fully Immunized Child (FIC)
-                                            and Completely Immunized Child (CIC)
-                                            compliance, and maintain
-                                            maternal-linked healthcare records
-                                            for barangay monitoring and public
-                                            health reporting.
-                                        </p>
-                                    </div>
+                            <div className="flex items-start gap-4">
+                                <div className="rounded-3xl bg-white/15 p-4 backdrop-blur-sm">
+                                    <Baby className="h-8 w-8" />
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-                                    <MiniStat
-                                        label="Total Records"
-                                        value={totalRecords}
-                                        icon={Baby}
-                                    />
+                                <div className="flex-1">
+                                    <h1 className="text-2xl font-bold tracking-tight">
+                                        Child Immunization Records
+                                    </h1>
 
-                                    <MiniStat
-                                        label="FIC"
-                                        value={ficCount}
-                                        icon={ShieldCheck}
-                                    />
-
-                                    <MiniStat
-                                        label="CIC"
-                                        value={cicCount}
-                                        icon={CheckCircle2}
-                                    />
-
-                                    <MiniStat
-                                        label="Incomplete"
-                                        value={incompleteCount}
-                                        icon={AlertCircle}
-                                    />
+                                    <p className="mt-2 max-w-3xl text-sm leading-relaxed text-violet-100">
+                                        Track child vaccination history,
+                                        monitor Fully Immunized Child (FIC)
+                                        and Completely Immunized Child (CIC)
+                                        compliance, and maintain
+                                        maternal-linked healthcare records
+                                        for barangay monitoring and public
+                                        health reporting.
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -520,99 +471,106 @@ export default function Index({ records = { data: [] }, filters = {} }) {
                             {/* Mobile Card View */}
                             <div className="block lg:hidden">
                                 {records.data && records.data.length > 0 ? (
-                                    <div className="divide-y divide-slate-100">
+                                    <div className="divide-y divide-slate-200">
                                         {records.data.map((record) => (
                                             <div
                                                 key={record.id}
-                                                className="bg-white p-4 transition hover:bg-violet-50/40"
+                                                className="bg-white p-5 transition hover:bg-violet-50/40"
                                             >
-                                                {/* Child Info */}
-                                                <div className="mb-4">
-                                                    <p className="font-semibold text-slate-800">
-                                                        {record.child_name ?? "—"}
-                                                    </p>
-                                                    <p className="mt-1 text-xs text-slate-500">
-                                                        Sex: {record.sex ?? "—"}
-                                                    </p>
-                                                </div>
+                                                {/* Form-like Layout */}
+                                                <div className="space-y-4">
+                                                    {/* Child Name - Primary */}
+                                                    <div>
+                                                        <label className="block text-xs font-semibold text-slate-500 mb-1.5">
+                                                            CHILD NAME
+                                                        </label>
+                                                        <p className="text-base font-bold text-slate-900">
+                                                            {record.child_name ?? "—"}
+                                                        </p>
+                                                    </div>
 
-                                                {/* Details Grid */}
-                                                <div className="space-y-3 text-sm">
+                                                    {/* Two Column Grid */}
+                                                    <div className="grid grid-cols-2 gap-4">
+                                                        {/* Sex */}
+                                                        <div>
+                                                            <label className="block text-xs font-semibold text-slate-500 mb-1.5">
+                                                                SEX
+                                                            </label>
+                                                            <p className="text-sm text-slate-900">
+                                                                {record.sex ?? "—"}
+                                                            </p>
+                                                        </div>
+
+                                                        {/* Family Serial */}
+                                                        <div>
+                                                            <label className="block text-xs font-semibold text-slate-500 mb-1.5">
+                                                                FAMILY SERIAL
+                                                            </label>
+                                                            <span className="inline-block rounded-md bg-violet-50 px-2.5 py-1 text-xs font-semibold text-violet-700 ring-1 ring-violet-200">
+                                                                {record.family_serial ?? "—"}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+
                                                     {/* Mother/Guardian */}
                                                     <div>
-                                                        <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                                                            Mother / Guardian
-                                                        </p>
-                                                        <p className="mt-1 font-medium text-slate-700">
+                                                        <label className="block text-xs font-semibold text-slate-500 mb-1.5">
+                                                            MOTHER / GUARDIAN
+                                                        </label>
+                                                        <p className="text-sm font-medium text-slate-900">
                                                             {record.mother_name ?? "—"}
                                                         </p>
                                                     </div>
 
-                                                    {/* Family Serial */}
-                                                    <div>
-                                                        <p className="text-xs font-medium uppercase tracking-wide text-slate-500 mb-1">
-                                                            Family Serial
-                                                        </p>
-                                                        <span className="inline-flex rounded-full bg-violet-50 px-3 py-1 text-xs font-semibold text-violet-700 ring-1 ring-violet-100">
-                                                            {record.family_serial ??
-                                                                "—"}
-                                                        </span>
-                                                    </div>
-
                                                     {/* Date of Birth */}
-                                                    <div className="flex items-start gap-2">
-                                                        <CalendarDays className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
-                                                        <div className="flex-1 min-w-0">
-                                                            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                                                                Date of Birth
-                                                            </p>
-                                                            <p className="mt-0.5 text-slate-700">
-                                                                {record.date_of_birth ??
-                                                                    "—"}
+                                                    <div>
+                                                        <label className="block text-xs font-semibold text-slate-500 mb-1.5">
+                                                            DATE OF BIRTH
+                                                        </label>
+                                                        <div className="flex items-center gap-2">
+                                                            <CalendarDays className="h-4 w-4 text-slate-400" />
+                                                            <p className="text-sm text-slate-900">
+                                                                {record.date_of_birth ?? "—"}
                                                             </p>
                                                         </div>
                                                     </div>
 
                                                     {/* Immunization Status */}
                                                     <div>
-                                                        <p className="text-xs font-medium uppercase tracking-wide text-slate-500 mb-2">
-                                                            Immunization Status
-                                                        </p>
+                                                        <label className="block text-xs font-semibold text-slate-500 mb-1.5">
+                                                            IMMUNIZATION STATUS
+                                                        </label>
                                                         <StatusBadge
                                                             fic={record.fic}
                                                             cic={record.cic}
-                                                            has_record={
-                                                                record.has_record
-                                                            }
+                                                            has_record={record.has_record}
                                                         />
                                                     </div>
 
                                                     {/* Address */}
-                                                    <div className="flex items-start gap-2">
-                                                        <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
-                                                        <div className="flex-1 min-w-0">
-                                                            <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                                                                Address
-                                                            </p>
-                                                            <p className="mt-0.5 text-slate-700 line-clamp-2">
-                                                                {record.address ??
-                                                                    "—"}
+                                                    <div>
+                                                        <label className="block text-xs font-semibold text-slate-500 mb-1.5">
+                                                            ADDRESS
+                                                        </label>
+                                                        <div className="flex items-start gap-2">
+                                                            <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
+                                                            <p className="text-sm text-slate-700 line-clamp-2">
+                                                                {record.address ?? "—"}
                                                             </p>
                                                         </div>
                                                     </div>
                                                 </div>
 
                                                 {/* Action Button */}
-                                                <div className="mt-4 pt-4 border-t border-slate-100">
+                                                <div className="mt-5 pt-5 border-t border-slate-200">
                                                     <Link
                                                         href={route(
                                                             "child.immunization.create",
                                                             {
-                                                                child_id:
-                                                                    record.id,
+                                                                child_id: record.id,
                                                             },
                                                         )}
-                                                        className="flex w-full items-center justify-center gap-2 rounded-lg bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all hover:bg-violet-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2"
+                                                        className="flex w-full items-center justify-center gap-2 rounded-lg bg-violet-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-violet-700 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2"
                                                     >
                                                         <Eye className="h-4 w-4" />
                                                         View / Edit

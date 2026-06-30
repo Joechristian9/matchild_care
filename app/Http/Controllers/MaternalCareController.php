@@ -23,11 +23,7 @@ class MaternalCareController extends Controller
      */
     public function index()
     {
-        // Get the next family serial number
-        $nextFamilySerial = $this->getNextFamilySerial();
-        
         return Inertia::render('Parent/MaternalCare', [
-            'nextFamilySerial' => $nextFamilySerial,
             'isEdit' => false,
         ]);
     }
@@ -69,6 +65,22 @@ class MaternalCareController extends Controller
             'address' => $maternalRecord->address,
             'age' => $maternalRecord->age,
             'age_group' => $maternalRecord->age_group,
+            
+            // Vital signs
+            'vital_signs' => [
+                'blood_pressure_systolic' => $maternalRecord->blood_pressure_systolic,
+                'blood_pressure_diastolic' => $maternalRecord->blood_pressure_diastolic,
+                'heart_rate' => $maternalRecord->heart_rate,
+                'temperature' => $maternalRecord->temperature,
+                'respiratory_rate' => $maternalRecord->respiratory_rate,
+                'weight' => $maternalRecord->weight,
+                'height' => $maternalRecord->height,
+                'bmi' => $maternalRecord->bmi,
+                'fetal_heart_tone' => $maternalRecord->fetal_heart_tone,
+                'fundal_height' => $maternalRecord->fundal_height,
+                'others' => $maternalRecord->vital_signs_others,
+            ],
+            
             'last_menstrual_period' => $formatDate($maternalRecord->last_menstrual_period),
             'gravida' => $maternalRecord->gravida,
             'parity' => $maternalRecord->parity,
@@ -241,28 +253,6 @@ class MaternalCareController extends Controller
     /**
      * Get the next family serial number
      */
-    private function getNextFamilySerial()
-    {
-        $currentYear = date('Y');
-        
-        // Get the last family serial for the current year
-        $lastRecord = MaternalRecord::where('family_serial', 'LIKE', "FS-{$currentYear}-%")
-            ->orderBy('family_serial', 'desc')
-            ->first();
-        
-        if ($lastRecord) {
-            // Extract the number from the last serial (e.g., "FS-2026-0001" -> 1)
-            $lastNumber = (int) substr($lastRecord->family_serial, -4);
-            $nextNumber = $lastNumber + 1;
-        } else {
-            // First record of the year
-            $nextNumber = 1;
-        }
-        
-        // Format: FS-YYYY-NNNN (e.g., FS-2026-0001)
-        return sprintf('FS-%s-%04d', $currentYear, $nextNumber);
-    }
-
     /**
      * Store a new maternal care record
      */

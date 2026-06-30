@@ -1,8 +1,9 @@
 import InputLabel from '@/Components/InputLabel';
 import TextInput from '@/Components/TextInput';
+import VitalSigns from '@/Components/MaternalCare/VitalSigns';
 import { useEffect } from 'react';
 
-export default function AdditionalInformationStep({ data, setData }) {
+export default function AdditionalInformationStep({ data, setData, errors }) {
     // Auto-calculate BMI when height and weight change
     useEffect(() => {
         const height = parseFloat(data.nutritional_assessment.height);
@@ -398,6 +399,9 @@ export default function AdditionalInformationStep({ data, setData }) {
                     })}
                 </div>
             </div>
+
+            {/* VITAL SIGNS */}
+            <VitalSigns data={data} setData={setData} errors={errors} />
 
         </div>
     );

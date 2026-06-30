@@ -14,7 +14,6 @@ import SupplementationScreeningStep from "@/Components/MaternalCare/Supplementat
 import DeliveryPostnatalStep from "@/Components/MaternalCare/DeliveryPostnatalStep";
 
 export default function MaternalCare({
-    nextFamilySerial,
     record = null,
     isEdit = false,
 }) {
@@ -29,13 +28,41 @@ export default function MaternalCare({
         date_of_registration:
             record?.date_of_registration ||
             new Date().toISOString().split("T")[0],
-        family_serial: record?.family_serial || nextFamilySerial || "",
+        family_serial: record?.family_serial || "",
         last_name: record?.last_name || "",
         first_name: record?.first_name || "",
         middle_initial: record?.middle_initial || "",
         address: record?.address || "",
         age: record?.age || "",
         age_group: record?.age_group || "",
+
+        vital_signs: record?.vital_signs
+            ? {
+                  blood_pressure_systolic: record.vital_signs.blood_pressure_systolic || "",
+                  blood_pressure_diastolic: record.vital_signs.blood_pressure_diastolic || "",
+                  heart_rate: record.vital_signs.heart_rate || "",
+                  temperature: record.vital_signs.temperature || "",
+                  respiratory_rate: record.vital_signs.respiratory_rate || "",
+                  weight: record.vital_signs.weight || "",
+                  height: record.vital_signs.height || "",
+                  bmi: record.vital_signs.bmi || "",
+                  fetal_heart_tone: record.vital_signs.fetal_heart_tone || "",
+                  fundal_height: record.vital_signs.fundal_height || "",
+                  others: record.vital_signs.others || "",
+              }
+            : {
+                  blood_pressure_systolic: "",
+                  blood_pressure_diastolic: "",
+                  heart_rate: "",
+                  temperature: "",
+                  respiratory_rate: "",
+                  weight: "",
+                  height: "",
+                  bmi: "",
+                  fetal_heart_tone: "",
+                  fundal_height: "",
+                  others: "",
+              },
 
         last_menstrual_period: record?.last_menstrual_period || "",
         gravida: record?.gravida || "",
@@ -556,24 +583,28 @@ export default function MaternalCare({
                                     <PrenatalCheckupsStep
                                         data={data}
                                         setData={setData}
+                                        errors={errors}
                                     />
                                 )}
                                 {currentStep === 4 && (
                                     <AdditionalInformationStep
                                         data={data}
                                         setData={setData}
+                                        errors={errors}
                                     />
                                 )}
                                 {currentStep === 5 && (
                                     <SupplementationScreeningStep
                                         data={data}
                                         setData={setData}
+                                        errors={errors}
                                     />
                                 )}
                                 {currentStep === 6 && (
                                     <DeliveryPostnatalStep
                                         data={data}
                                         setData={setData}
+                                        errors={errors}
                                     />
                                 )}
 
