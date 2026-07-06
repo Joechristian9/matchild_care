@@ -78,6 +78,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/maternal-care', [MaternalCareController::class, 'store'])->name('maternal-care.store');
         Route::get('/maternal-care/{id}/edit', [MaternalCareController::class, 'edit'])->name('maternal-care.edit');
         Route::put('/maternal-care/{id}', [MaternalCareController::class, 'update'])->name('maternal-care.update');
+        Route::post('/maternal-care/{recordId}/visit/{visitNumber}', [MaternalCareController::class, 'updatePrenatalVisit'])->name('maternal-care.visit.update');
+        Route::post('/maternal-care/{recordId}/supplementation/{visitNumber}', [MaternalCareController::class, 'updateSupplementationVisit'])->name('maternal-care.supplementation.update');
         // Bulk PDF route
         Route::get('/maternal-care/bulk-pdf', [MaternalCareController::class, 'generateBulkPdf'])->name('maternal-care.bulk-pdf');
     });

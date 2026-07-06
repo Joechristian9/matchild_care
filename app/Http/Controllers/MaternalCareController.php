@@ -7,6 +7,7 @@ use App\Services\MaternalCareService;
 use App\Models\MaternalRecord;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class MaternalCareController extends Controller
@@ -91,6 +92,19 @@ class MaternalCareController extends Controller
                 return [
                     'visit_number' => $visit->visit_number,
                     'visit_date' => $formatDate($visit->visit_date),
+                    'is_completed' => $visit->is_completed,
+                    'vital_signs' => [
+                        'weight' => $visit->weight,
+                        'height' => $visit->height,
+                        'blood_pressure_systolic' => $visit->blood_pressure_systolic,
+                        'blood_pressure_diastolic' => $visit->blood_pressure_diastolic,
+                        'temperature' => $visit->temperature,
+                        'heart_rate' => $visit->heart_rate,
+                        'respiratory_rate' => $visit->respiratory_rate,
+                        'fetal_heart_tone' => $visit->fetal_heart_tone,
+                        'fundal_height' => $visit->fundal_height,
+                        'others' => $visit->others,
+                    ],
                 ];
             })->toArray(),
 
@@ -121,6 +135,19 @@ class MaternalCareController extends Controller
                     'visit_number' => $supp->visit_number,
                     'supplementation_date' => $formatDate($supp->supplementation_date),
                     'tablets_given' => $supp->tablets_given,
+                    'is_completed' => $supp->is_completed,
+                    'vital_signs' => [
+                        'weight' => $supp->weight,
+                        'height' => $supp->height,
+                        'blood_pressure_systolic' => $supp->blood_pressure_systolic,
+                        'blood_pressure_diastolic' => $supp->blood_pressure_diastolic,
+                        'temperature' => $supp->temperature,
+                        'heart_rate' => $supp->heart_rate,
+                        'respiratory_rate' => $supp->respiratory_rate,
+                        'fetal_heart_tone' => $supp->fetal_heart_tone,
+                        'fundal_height' => $supp->fundal_height,
+                        'others' => $supp->others,
+                    ],
                 ];
             })->toArray(),
 
@@ -341,6 +368,116 @@ class MaternalCareController extends Controller
                 'message' => $e->getMessage(),
                 'line' => $e->getLine(),
                 'file' => basename($e->getFile())
+            ], 500);
+        }
+    }
+    
+    /**
+     * Update or create a prenatal visit with vital signs
+     */
+    public function updatePrenatalVisit(Request $request, $recordId, $visitNumber)
+    {
+        try {
+            $request->validate([
+                'visit_date' => 'nullable|date',
+                'vital_signs' => 'nullable|array',
+                'vital_signs.weight' => 'nullable|numeric|min:0|max:300',
+                'vital_signs.height' => 'nullable|numeric|min:0|max:250',
+                'vital_signs.blood_pressure_systolic' => 'nullable|integer|min:0|max:300',
+                'vital_signs.blood_pressure_diastolic' => 'nullable|integer|min:0|max:200',
+                'vital_signs.temperature' => 'nullable|numeric|min:30|max:45',
+                'vital_signs.heart_rate' => 'nullable|integer|min:0|max:250',
+                'vital_signs.respiratory_rate' => 'nullable|integer|min:0|max:100',
+                'vital_signs.fetal_heart_tone' => 'nullable|integer|min:0|max:200',
+                'vital_signs.fundal_height' => 'nullable|numeric|min:0|max:50',
+                'vital_signs.others' => 'nullable|string',
+                'is_completed' => 'nullable|boolean',
+            ]);
+
+            $maternalRecord = MaternalRecord::findOrFail($recordId);
+
+            $visit = $this->maternalCareService->updateOrCreatePrenatalVisit(
+                $maternalRecord,
+                $visitNumber,
+                [
+                    'visit_date' => $request->input('visit_date'),
+                    'vital_signs' => $request->input('vital_signs', []),
+                    'is_completed' => $request->input('is_completed', false),
+                ]
+            );
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Prenatal visit updated successfully',
+                'visit' => $visit
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Failed to update prenatal visit', [
+                'record_id' => $recordId,
+                'visit_number' => $visitNumber,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update prenatal visit'
+            ], 500);
+        }
+    }
+    
+    /**
+     * Update or create a prenatal supplementation visit with vital signs
+     */
+    public function updateSupplementationVisit(Request $request, $recordId, $visitNumber)
+    {
+        try {
+            $request->validate([
+                'visit_date' => 'nullable|date',
+                'tablets' => 'nullable|integer|min:0',
+                'vital_signs' => 'nullable|array',
+                'vital_signs.weight' => 'nullable|numeric|min:0|max:300',
+                'vital_signs.height' => 'nullable|numeric|min:0|max:250',
+                'vital_signs.blood_pressure_systolic' => 'nullable|integer|min:0|max:300',
+                'vital_signs.blood_pressure_diastolic' => 'nullable|integer|min:0|max:200',
+                'vital_signs.temperature' => 'nullable|numeric|min:30|max:45',
+                'vital_signs.heart_rate' => 'nullable|integer|min:0|max:250',
+                'vital_signs.respiratory_rate' => 'nullable|integer|min:0|max:100',
+                'vital_signs.fetal_heart_tone' => 'nullable|integer|min:0|max:200',
+                'vital_signs.fundal_height' => 'nullable|numeric|min:0|max:50',
+                'vital_signs.others' => 'nullable|string',
+                'is_completed' => 'nullable|boolean',
+            ]);
+
+            $maternalRecord = MaternalRecord::findOrFail($recordId);
+
+            $supplementation = $this->maternalCareService->updateOrCreateSupplementationVisit(
+                $maternalRecord,
+                $visitNumber,
+                [
+                    'visit_date' => $request->input('visit_date'),
+                    'tablets' => $request->input('tablets'),
+                    'vital_signs' => $request->input('vital_signs', []),
+                    'is_completed' => $request->input('is_completed', false),
+                ]
+            );
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Supplementation visit updated successfully',
+                'supplementation' => $supplementation
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Failed to update supplementation visit', [
+                'record_id' => $recordId,
+                'visit_number' => $visitNumber,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update supplementation visit'
             ], 500);
         }
     }

@@ -29,11 +29,11 @@ class MaternalCareService
             // Create main maternal record
             $maternalRecord = $this->createMainRecord($data, $userId);
             
-            // Create related records
-            $this->createPrenatalVisits($maternalRecord, $data['visits'] ?? []);
+            // Create related records - pass full data for vital signs
+            $this->createPrenatalVisits($maternalRecord, $data['visits'] ?? [], $data);
             $this->createNutritionalAssessment($maternalRecord, $data['nutritional_assessment'] ?? []);
             $this->createImmunizationRecord($maternalRecord, $data['immunization_status'] ?? []);
-            $this->createPrenatalSupplementations($maternalRecord, $data['prenatal_supplementation'] ?? []);
+            $this->createPrenatalSupplementations($maternalRecord, $data['prenatal_supplementation'] ?? [], $data);
             $this->createMicronutrientSupplementations($maternalRecord, $data['micronutrient_supplementation'] ?? []);
             $this->createHighRiskSupplementations($maternalRecord, $data['high_risk_supplementation'] ?? []);
             $this->createLaboratoryScreening($maternalRecord, $data['laboratory_screening'] ?? []);
@@ -96,10 +96,10 @@ class MaternalCareService
             ]);
             
             // Update or create related records
-            $this->updateOrCreatePrenatalVisits($maternalRecord, $data['visits'] ?? []);
+            $this->updateOrCreatePrenatalVisits($maternalRecord, $data['visits'] ?? [], $data);
             $this->updateOrCreateNutritionalAssessment($maternalRecord, $data['nutritional_assessment'] ?? []);
             $this->updateOrCreateImmunizationRecord($maternalRecord, $data['immunization_status'] ?? []);
-            $this->updateOrCreatePrenatalSupplementations($maternalRecord, $data['prenatal_supplementation'] ?? []);
+            $this->updateOrCreatePrenatalSupplementations($maternalRecord, $data['prenatal_supplementation'] ?? [], $data);
             $this->updateOrCreateMicronutrientSupplementations($maternalRecord, $data['micronutrient_supplementation'] ?? []);
             $this->updateOrCreateHighRiskSupplementations($maternalRecord, $data['high_risk_supplementation'] ?? []);
             $this->updateOrCreateLaboratoryScreening($maternalRecord, $data['laboratory_screening'] ?? []);
@@ -127,11 +127,11 @@ class MaternalCareService
     }
 
     // Update or create methods (similar to create but use updateOrCreate)
-    private function updateOrCreatePrenatalVisits(MaternalRecord $record, array $visits): void
+    private function updateOrCreatePrenatalVisits(MaternalRecord $record, array $visits, array $allData = []): void
     {
         // Delete existing visits and recreate
         $record->prenatalVisits()->delete();
-        $this->createPrenatalVisits($record, $visits);
+        $this->createPrenatalVisits($record, $visits, $allData);
     }
 
     private function updateOrCreateNutritionalAssessment(MaternalRecord $record, array $data): void
@@ -169,10 +169,10 @@ class MaternalCareService
         }
     }
 
-    private function updateOrCreatePrenatalSupplementations(MaternalRecord $record, array $data): void
+    private function updateOrCreatePrenatalSupplementations(MaternalRecord $record, array $data, array $allData = []): void
     {
         $record->prenatalSupplementations()->delete();
-        $this->createPrenatalSupplementations($record, $data);
+        $this->createPrenatalSupplementations($record, $data, $allData);
     }
 
     private function updateOrCreateMicronutrientSupplementations(MaternalRecord $record, array $data): void
@@ -295,18 +295,104 @@ class MaternalCareService
         ]);
     }
 
-    private function createPrenatalVisits(MaternalRecord $record, array $visits): void
+    private function createPrenatalVisits(MaternalRecord $record, array $visits, array $allData = []): void
     {
-        foreach ($visits as $key => $date) {
-            if (!empty($date)) {
-                $visitNumber = (int) str_replace('visit_', '', $key);
-                PrenatalVisit::create([
-                    'maternal_record_id' => $record->id,
-                    'visit_number' => $visitNumber,
-                    'visit_date' => $date,
-                ]);
+        // Handle visit dates and vital signs
+        if (!empty($visits)) {
+            foreach ($visits as $key => $date) {
+                if (str_starts_with($key, 'visit_')) {
+                    $visitNumber = (int) str_replace('visit_', '', $key);
+                    
+                    // Get vital signs for this visit
+                    $vitalSignsKey = "visit_{$visitNumber}_vital_signs";
+                    $vitalSigns = $allData[$vitalSignsKey] ?? [];
+                    
+                    // Check if this visit is completed
+                    $completedVisits = $allData['completedVisits'] ?? [];
+                    $isCompleted = in_array($visitNumber, $completedVisits);
+                    
+                    // Check if visit has any data (date, vital signs, or is completed)
+                    $hasVitalSigns = !empty(array_filter($vitalSigns));
+                    $hasData = !empty($date) || $hasVitalSigns || $isCompleted;
+                    
+                    // Only create visit if it has some data
+                    if ($hasData) {
+                        PrenatalVisit::create([
+                            'maternal_record_id' => $record->id,
+                            'visit_number' => $visitNumber,
+                            'visit_date' => $date ?: null,
+                            'weight' => $vitalSigns['weight'] ?? null,
+                            'height' => $vitalSigns['height'] ?? null,
+                            'blood_pressure_systolic' => $vitalSigns['blood_pressure_systolic'] ?? null,
+                            'blood_pressure_diastolic' => $vitalSigns['blood_pressure_diastolic'] ?? null,
+                            'temperature' => $vitalSigns['temperature'] ?? null,
+                            'heart_rate' => $vitalSigns['heart_rate'] ?? null,
+                            'respiratory_rate' => $vitalSigns['respiratory_rate'] ?? null,
+                            'fetal_heart_tone' => $vitalSigns['fetal_heart_tone'] ?? null,
+                            'fundal_height' => $vitalSigns['fundal_height'] ?? null,
+                            'others' => $vitalSigns['others'] ?? null,
+                            'is_completed' => $isCompleted,
+                        ]);
+                    }
+                }
             }
         }
+    }
+    
+    /**
+     * Update or create prenatal visits with vital signs
+     */
+    public function updateOrCreatePrenatalVisit(MaternalRecord $record, int $visitNumber, array $data): PrenatalVisit
+    {
+        return $record->prenatalVisits()->updateOrCreate(
+            [
+                'maternal_record_id' => $record->id,
+                'visit_number' => $visitNumber
+            ],
+            [
+                'visit_date' => $data['visit_date'] ?? null,
+                'weight' => $data['vital_signs']['weight'] ?? null,
+                'height' => $data['vital_signs']['height'] ?? null,
+                'blood_pressure_systolic' => $data['vital_signs']['blood_pressure_systolic'] ?? null,
+                'blood_pressure_diastolic' => $data['vital_signs']['blood_pressure_diastolic'] ?? null,
+                'temperature' => $data['vital_signs']['temperature'] ?? null,
+                'heart_rate' => $data['vital_signs']['heart_rate'] ?? null,
+                'respiratory_rate' => $data['vital_signs']['respiratory_rate'] ?? null,
+                'fetal_heart_tone' => $data['vital_signs']['fetal_heart_tone'] ?? null,
+                'fundal_height' => $data['vital_signs']['fundal_height'] ?? null,
+                'others' => $data['vital_signs']['others'] ?? null,
+                'is_completed' => $data['is_completed'] ?? false,
+            ]
+        );
+    }
+    
+    /**
+     * Update or create prenatal supplementation visit with vital signs
+     */
+    public function updateOrCreateSupplementationVisit(MaternalRecord $record, int $visitNumber, array $data): PrenatalSupplementation
+    {
+        return $record->prenatalSupplementations()->updateOrCreate(
+            [
+                'maternal_record_id' => $record->id,
+                'visit_number' => $visitNumber,
+                'supplement_type' => 'IFA'
+            ],
+            [
+                'supplementation_date' => $data['visit_date'] ?? null,
+                'tablets_given' => $data['tablets'] ?? null,
+                'weight' => $data['vital_signs']['weight'] ?? null,
+                'height' => $data['vital_signs']['height'] ?? null,
+                'blood_pressure_systolic' => $data['vital_signs']['blood_pressure_systolic'] ?? null,
+                'blood_pressure_diastolic' => $data['vital_signs']['blood_pressure_diastolic'] ?? null,
+                'temperature' => $data['vital_signs']['temperature'] ?? null,
+                'heart_rate' => $data['vital_signs']['heart_rate'] ?? null,
+                'respiratory_rate' => $data['vital_signs']['respiratory_rate'] ?? null,
+                'fetal_heart_tone' => $data['vital_signs']['fetal_heart_tone'] ?? null,
+                'fundal_height' => $data['vital_signs']['fundal_height'] ?? null,
+                'others' => $data['vital_signs']['others'] ?? null,
+                'is_completed' => $data['is_completed'] ?? false,
+            ]
+        );
     }
 
     private function createNutritionalAssessment(MaternalRecord $record, array $data): void
@@ -340,16 +426,42 @@ class MaternalCareService
         }
     }
 
-    private function createPrenatalSupplementations(MaternalRecord $record, array $data): void
+    private function createPrenatalSupplementations(MaternalRecord $record, array $data, array $allData = []): void
     {
         if (!empty($data['iron_folic_acid'])) {
             foreach ($data['iron_folic_acid'] as $index => $visit) {
-                if (!empty($visit['date']) || !empty($visit['tablets'])) {
+                $visitNumber = $index + 1;
+                
+                // Get vital signs for this supplementation visit
+                $vitalSignsKey = "supplement_visit_{$visitNumber}_vital_signs";
+                $vitalSigns = $allData[$vitalSignsKey] ?? [];
+                
+                // Check if this visit is completed
+                $completedVisits = $allData['completedSupplementVisits'] ?? [];
+                $isCompleted = in_array($visitNumber, $completedVisits);
+                
+                // Check if visit has any data (date, tablets, vital signs, or is completed)
+                $hasVitalSigns = !empty(array_filter($vitalSigns));
+                $hasData = !empty($visit['date']) || !empty($visit['tablets']) || $hasVitalSigns || $isCompleted;
+                
+                // Only create visit if it has some data
+                if ($hasData) {
                     PrenatalSupplementation::create([
                         'maternal_record_id' => $record->id,
-                        'visit_number' => $index + 1,
-                        'visit_date' => $visit['date'] ?? null,
+                        'visit_number' => $visitNumber,
+                        'supplementation_date' => $visit['date'] ?? null,
                         'tablets_given' => $visit['tablets'] ?? null,
+                        'weight' => $vitalSigns['weight'] ?? null,
+                        'height' => $vitalSigns['height'] ?? null,
+                        'blood_pressure_systolic' => $vitalSigns['blood_pressure_systolic'] ?? null,
+                        'blood_pressure_diastolic' => $vitalSigns['blood_pressure_diastolic'] ?? null,
+                        'temperature' => $vitalSigns['temperature'] ?? null,
+                        'heart_rate' => $vitalSigns['heart_rate'] ?? null,
+                        'respiratory_rate' => $vitalSigns['respiratory_rate'] ?? null,
+                        'fetal_heart_tone' => $vitalSigns['fetal_heart_tone'] ?? null,
+                        'fundal_height' => $vitalSigns['fundal_height'] ?? null,
+                        'others' => $vitalSigns['others'] ?? null,
+                        'is_completed' => $isCompleted,
                     ]);
                 }
             }

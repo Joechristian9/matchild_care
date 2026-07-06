@@ -1,6 +1,6 @@
 import InputLabel from '@/Components/InputLabel';
 import TextInput from '@/Components/TextInput';
-import VitalSigns from '@/Components/MaternalCare/VitalSigns';
+import PrenatalSupplementationVisits from '@/Components/MaternalCare/PrenatalSupplementationVisits';
 import { useEffect } from 'react';
 
 export default function AdditionalInformationStep({ data, setData, errors }) {
@@ -292,116 +292,8 @@ export default function AdditionalInformationStep({ data, setData, errors }) {
                 </div>
             </div>
 
-            {/* PRENATAL SUPPLEMENTATION */}
-            <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-md hover:shadow-lg transition-shadow duration-200">
-                <div className="flex items-center gap-3 mb-5 pb-4 border-b border-gray-100">
-                    <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <svg className="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                        </svg>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                        <h4 className="text-base font-bold text-gray-900 truncate">Prenatal Supplementation</h4>
-                        <p className="text-xs text-gray-500 truncate">Iron Folic Acid (IFA) distribution tracking (4 weeks apart)</p>
-                    </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                    {[1, 2, 3, 4, 5, 6].map((visitNum) => {
-                        const hasDate = data.prenatal_supplementation.iron_folic_acid[visitNum - 1]?.date;
-                        const hasTablets = data.prenatal_supplementation.iron_folic_acid[visitNum - 1]?.tablets;
-                        const isCompleted = hasDate && hasTablets;
-                        
-                        // Get suggested date
-                        const getSuggestedSupplementDate = () => {
-                            if (visitNum === 1) return null;
-                            const prevDate = data.prenatal_supplementation.iron_folic_acid[visitNum - 2]?.date;
-                            
-                            if (prevDate && !hasDate) {
-                                const prev = new Date(prevDate);
-                                const suggested = new Date(prev);
-                                suggested.setDate(prev.getDate() + 28); // 4 weeks
-                                return suggested.toISOString().split('T')[0];
-                            }
-                            return null;
-                        };
-                        
-                        const suggestedDate = getSuggestedSupplementDate();
-                        
-                        return (
-                            <div
-                                key={visitNum}
-                                className={`border-2 rounded-lg p-4 ${isCompleted ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-300' : 'bg-white border-green-100'}`}
-                            >
-                                <div className="flex items-center gap-2 mb-3">
-                                    <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${isCompleted ? 'bg-green-100' : 'bg-green-50'}`}>
-                                        {isCompleted ? (
-                                            <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                            </svg>
-                                        ) : (
-                                            <span className="text-xs font-bold text-green-600">{visitNum}</span>
-                                        )}
-                                    </div>
-                                    <h5 className={`text-sm font-semibold ${isCompleted ? 'text-green-900' : 'text-gray-800'}`}>Visit {visitNum}</h5>
-                                </div>
-
-                                <div className="space-y-3">
-                                    <div>
-                                        <InputLabel value="Date" className="text-xs" />
-                                        <TextInput
-                                            type="date"
-                                            className={`mt-1 block w-full text-sm ${isCompleted ? 'border-green-300' : ''}`}
-                                            value={data.prenatal_supplementation.iron_folic_acid[visitNum - 1]?.date || ''}
-                                            onChange={(e) => {
-                                                const newIFA = [...data.prenatal_supplementation.iron_folic_acid];
-                                                newIFA[visitNum - 1] = {
-                                                    ...newIFA[visitNum - 1],
-                                                    date: e.target.value
-                                                };
-                                                setData('prenatal_supplementation', {
-                                                    ...data.prenatal_supplementation,
-                                                    iron_folic_acid: newIFA
-                                                });
-                                            }}
-                                        />
-                                        {suggestedDate && (
-                                            <div className="mt-1 p-1.5 bg-blue-50 border border-blue-200 rounded">
-                                                <p className="text-xs text-blue-700">
-                                                    💡 Suggested: {new Date(suggestedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                                                </p>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    <div>
-                                        <InputLabel value="# Tablets" className="text-xs" />
-                                        <TextInput
-                                            type="number"
-                                            className="mt-1 block w-full text-sm"
-                                            value={data.prenatal_supplementation.iron_folic_acid[visitNum - 1]?.tablets || ''}
-                                            onChange={(e) => {
-                                                const newIFA = [...data.prenatal_supplementation.iron_folic_acid];
-                                                newIFA[visitNum - 1] = {
-                                                    ...newIFA[visitNum - 1],
-                                                    tablets: e.target.value
-                                                };
-                                                setData('prenatal_supplementation', {
-                                                    ...data.prenatal_supplementation,
-                                                    iron_folic_acid: newIFA
-                                                });
-                                            }}
-                                            placeholder="Enter number"
-                                        />
-                                    </div>
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-            </div>
-
-            {/* VITAL SIGNS */}
-            <VitalSigns data={data} setData={setData} errors={errors} />
+            {/* PRENATAL SUPPLEMENTATION WITH VISIT LOGIC */}
+            <PrenatalSupplementationVisits data={data} setData={setData} errors={errors} />
 
         </div>
     );

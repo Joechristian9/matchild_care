@@ -95,6 +95,17 @@ export default function MaternalCare({
             visit_8: "",
         },
 
+        // Initialize completedVisits from database
+        completedVisits: record?.prenatal_visits
+            ?.filter(visit => visit.is_completed)
+            .map(visit => visit.visit_number) || [],
+
+        // Initialize vital signs for each visit
+        ...(record?.prenatal_visits?.reduce((acc, visit) => {
+            acc[`visit_${visit.visit_number}_vital_signs`] = visit.vital_signs || {};
+            return acc;
+        }, {}) || {}),
+
         nutritional_assessment: record?.nutritional_assessment
             ? {
                   height: record.nutritional_assessment.height || "",
@@ -148,6 +159,17 @@ export default function MaternalCare({
                       }))
                     : Array(6).fill({ date: "", tablets: "" }),
         },
+
+        // Initialize completedSupplementVisits from database
+        completedSupplementVisits: record?.prenatal_supplementations
+            ?.filter(supp => supp.is_completed)
+            .map(supp => supp.visit_number) || [],
+
+        // Initialize supplement vital signs for each visit
+        ...(record?.prenatal_supplementations?.reduce((acc, supp) => {
+            acc[`supplement_visit_${supp.visit_number}_vital_signs`] = supp.vital_signs || {};
+            return acc;
+        }, {}) || {}),
 
         micronutrient_supplementation: {
             completed:

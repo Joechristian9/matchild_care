@@ -15,10 +15,26 @@ class PrenatalSupplementation extends Model
         'supplementation_date',
         'tablets_given',
         'supplement_type',
+        'weight',
+        'height',
+        'blood_pressure_systolic',
+        'blood_pressure_diastolic',
+        'temperature',
+        'heart_rate',
+        'respiratory_rate',
+        'fetal_heart_tone',
+        'fundal_height',
+        'others',
+        'is_completed',
     ];
 
     protected $casts = [
         'supplementation_date' => 'date',
+        'weight' => 'decimal:2',
+        'height' => 'decimal:2',
+        'temperature' => 'decimal:1',
+        'fundal_height' => 'decimal:1',
+        'is_completed' => 'boolean',
     ];
 
     /**

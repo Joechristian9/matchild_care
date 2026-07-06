@@ -145,64 +145,49 @@ function BasicInformationStep({ data, setData, errors, isEdit = false }) {
                         />
                         <InputError message={errors.address} className="mt-2" />
                     </div>
-                </div>
-            </div>
 
-            {/* SECTION 3 - Age Information */}
-            <div className="bg-gradient-to-br from-white to-amber-50/30 rounded-2xl p-8 border border-amber-100 shadow-sm hover:shadow-md transition-all duration-200">
-                <div className="flex items-center gap-4 mb-6">
-                    <div className="w-14 h-14 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center shadow-lg shadow-amber-200/50">
-                        <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
-                        </svg>
-                    </div>
-                    <div>
-                        <h4 className="text-lg font-bold text-gray-900">Age Information</h4>
-                        <p className="text-sm text-gray-600">Patient's age and category</p>
-                    </div>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <InputLabel htmlFor="age" value="Age" required />
-                        <TextInput
-                            id="age"
-                            type="number"
-                            value={data.age}
-                            onChange={(e) => setData('age', e.target.value)}
-                            placeholder="Enter age"
-                            min="10"
-                            max="49"
-                            required
-                        />
-                        <InputError message={errors.age} className="mt-2" />
-                    </div>
-
-                    <div>
-                        <InputLabel htmlFor="age_group" value="Age Group" />
-                        <div className="relative">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <InputLabel htmlFor="age" value="Age" required />
                             <TextInput
-                                id="age_group"
-                                type="text"
-                                value={data.age_group ? `${data.age_group} years` : ''}
-                                readOnly
-                                disabled
-                                placeholder="Auto-calculated"
-                                className="bg-amber-50/50 border-amber-200"
+                                id="age"
+                                type="number"
+                                value={data.age}
+                                onChange={(e) => setData('age', e.target.value)}
+                                placeholder="Enter age"
+                                min="10"
+                                max="49"
+                                required
                             />
-                            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                                <svg className="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </div>
+                            <InputError message={errors.age} className="mt-2" />
                         </div>
-                        <p className="mt-2 text-xs text-amber-600 flex items-center gap-1.5">
-                            <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span>Automatically calculated based on age</span>
-                        </p>
-                        <InputError message={errors.age_group} className="mt-2" />
+
+                        <div>
+                            <InputLabel htmlFor="age_group" value="Age Group" />
+                            <div className="relative">
+                                <TextInput
+                                    id="age_group"
+                                    type="text"
+                                    value={data.age_group ? `${data.age_group} years` : ''}
+                                    readOnly
+                                    disabled
+                                    placeholder="Auto-calculated"
+                                    className="bg-purple-50/50 border-purple-200"
+                                />
+                                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                                    <svg className="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                            </div>
+                            <p className="mt-2 text-xs text-purple-600 flex items-center gap-1.5">
+                                <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span>Automatically calculated based on age</span>
+                            </p>
+                            <InputError message={errors.age_group} className="mt-2" />
+                        </div>
                     </div>
                 </div>
             </div>
