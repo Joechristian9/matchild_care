@@ -75,6 +75,7 @@ Route::middleware('auth')->group(function () {
     // Parent Services Routes
     Route::prefix('parent')->name('parent.')->group(function () {
         Route::get('/maternal-care', [MaternalCareController::class, 'index'])->name('maternal-care');
+        Route::get('/maternal-care/register', [MaternalCareController::class, 'register'])->name('maternal-care.register');
         Route::post('/maternal-care', [MaternalCareController::class, 'store'])->name('maternal-care.store');
         Route::get('/maternal-care/{id}/edit', [MaternalCareController::class, 'edit'])->name('maternal-care.edit');
         Route::put('/maternal-care/{id}', [MaternalCareController::class, 'update'])->name('maternal-care.update');

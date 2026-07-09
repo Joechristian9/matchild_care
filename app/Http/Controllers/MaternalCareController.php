@@ -20,13 +20,45 @@ class MaternalCareController extends Controller
     }
 
     /**
-     * Display the maternal care registration form
+     * Display the maternal care records list
      */
-    public function index()
+    public function index(Request $request)
     {
-        return Inertia::render('Parent/MaternalCare', [
-            'isEdit' => false,
+        $query = MaternalRecord::select([
+            'id', 'family_serial', 'first_name', 'last_name', 'middle_initial',
+            'age', 'age_group', 'date_of_registration', 'expected_date_of_delivery',
         ]);
+
+        // Search
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('last_name', 'like', "%{$search}%")
+                  ->orWhere('first_name', 'like', "%{$search}%")
+                  ->orWhere('family_serial', 'like', "%{$search}%")
+                  ->orWhere('age', 'like', "%{$search}%");
+            });
+        }
+
+        // Age group filter
+        if ($request->filled('age_group') && $request->age_group !== 'all') {
+            $query->where('age_group', $request->age_group);
+        }
+
+        $records = $query->orderBy('id', 'desc')->paginate(15)->withQueryString();
+
+        return Inertia::render('Parent/MaternalCare', [
+            'records'  => $records,
+            'filters'  => $request->only(['search', 'age_group']),
+        ]);
+    }
+
+    /**
+     * Display the standalone registration form (Basic Information step)
+     */
+    public function register()
+    {
+        return Inertia::render('Parent/MaternalCareRegister');
     }
 
     /**
@@ -230,7 +262,7 @@ class MaternalCareController extends Controller
             })->toArray(),
         ];
 
-        return Inertia::render('Parent/MaternalCare', [
+        return Inertia::render('Parent/MaternalCareEdit', [
             'record' => $formData,
             'isEdit' => true,
         ]);
@@ -304,7 +336,7 @@ class MaternalCareController extends Controller
             ]);
 
             return redirect()
-                ->route('parent.maternal-care')
+                ->route('parent.maternal-care.register')
                 ->with('success', 'Maternal care record created successfully.');
 
         } catch (\Exception $e) {
