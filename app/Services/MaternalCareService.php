@@ -17,6 +17,7 @@ use App\Models\PostpartumSupplementation;
 use App\Models\PostpartumIfaCompletion;
 use App\Models\PostpartumRemark;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class MaternalCareService
 {
@@ -312,7 +313,7 @@ class MaternalCareService
                     $isCompleted = in_array($visitNumber, $completedVisits);
                     
                     // Check if visit has any data (date, vital signs, or is completed)
-                    $hasVitalSigns = !empty(array_filter($vitalSigns));
+                    $hasVitalSigns = !empty(array_filter($vitalSigns, fn($v) => $v !== null && $v !== ''));
                     $hasData = !empty($date) || $hasVitalSigns || $isCompleted;
                     
                     // Only create visit if it has some data
@@ -321,16 +322,16 @@ class MaternalCareService
                             'maternal_record_id' => $record->id,
                             'visit_number' => $visitNumber,
                             'visit_date' => $date ?: null,
-                            'weight' => $vitalSigns['weight'] ?? null,
-                            'height' => $vitalSigns['height'] ?? null,
-                            'blood_pressure_systolic' => $vitalSigns['blood_pressure_systolic'] ?? null,
-                            'blood_pressure_diastolic' => $vitalSigns['blood_pressure_diastolic'] ?? null,
-                            'temperature' => $vitalSigns['temperature'] ?? null,
-                            'heart_rate' => $vitalSigns['heart_rate'] ?? null,
-                            'respiratory_rate' => $vitalSigns['respiratory_rate'] ?? null,
-                            'fetal_heart_tone' => $vitalSigns['fetal_heart_tone'] ?? null,
-                            'fundal_height' => $vitalSigns['fundal_height'] ?? null,
-                            'others' => $vitalSigns['others'] ?? null,
+                            'weight' => isset($vitalSigns['weight']) && $vitalSigns['weight'] !== '' ? $vitalSigns['weight'] : null,
+                            'height' => isset($vitalSigns['height']) && $vitalSigns['height'] !== '' ? $vitalSigns['height'] : null,
+                            'blood_pressure_systolic' => isset($vitalSigns['blood_pressure_systolic']) && $vitalSigns['blood_pressure_systolic'] !== '' ? $vitalSigns['blood_pressure_systolic'] : null,
+                            'blood_pressure_diastolic' => isset($vitalSigns['blood_pressure_diastolic']) && $vitalSigns['blood_pressure_diastolic'] !== '' ? $vitalSigns['blood_pressure_diastolic'] : null,
+                            'temperature' => isset($vitalSigns['temperature']) && $vitalSigns['temperature'] !== '' ? $vitalSigns['temperature'] : null,
+                            'heart_rate' => isset($vitalSigns['heart_rate']) && $vitalSigns['heart_rate'] !== '' ? $vitalSigns['heart_rate'] : null,
+                            'respiratory_rate' => isset($vitalSigns['respiratory_rate']) && $vitalSigns['respiratory_rate'] !== '' ? $vitalSigns['respiratory_rate'] : null,
+                            'fetal_heart_tone' => isset($vitalSigns['fetal_heart_tone']) && $vitalSigns['fetal_heart_tone'] !== '' ? $vitalSigns['fetal_heart_tone'] : null,
+                            'fundal_height' => isset($vitalSigns['fundal_height']) && $vitalSigns['fundal_height'] !== '' ? $vitalSigns['fundal_height'] : null,
+                            'others' => isset($vitalSigns['others']) && $vitalSigns['others'] !== '' ? $vitalSigns['others'] : null,
                             'is_completed' => $isCompleted,
                         ]);
                     }
@@ -344,25 +345,39 @@ class MaternalCareService
      */
     public function updateOrCreatePrenatalVisit(MaternalRecord $record, int $visitNumber, array $data): PrenatalVisit
     {
+        $vitalSigns = $data['vital_signs'] ?? [];
+        
+        Log::info('updateOrCreatePrenatalVisit - Input data', [
+            'visit_number' => $visitNumber,
+            'raw_vital_signs' => $vitalSigns,
+        ]);
+        
+        $visitData = [
+            'visit_date' => $data['visit_date'] ?? null,
+            'weight' => isset($vitalSigns['weight']) && $vitalSigns['weight'] !== '' ? $vitalSigns['weight'] : null,
+            'height' => isset($vitalSigns['height']) && $vitalSigns['height'] !== '' ? $vitalSigns['height'] : null,
+            'blood_pressure_systolic' => isset($vitalSigns['blood_pressure_systolic']) && $vitalSigns['blood_pressure_systolic'] !== '' ? $vitalSigns['blood_pressure_systolic'] : null,
+            'blood_pressure_diastolic' => isset($vitalSigns['blood_pressure_diastolic']) && $vitalSigns['blood_pressure_diastolic'] !== '' ? $vitalSigns['blood_pressure_diastolic'] : null,
+            'temperature' => isset($vitalSigns['temperature']) && $vitalSigns['temperature'] !== '' ? $vitalSigns['temperature'] : null,
+            'heart_rate' => isset($vitalSigns['heart_rate']) && $vitalSigns['heart_rate'] !== '' ? $vitalSigns['heart_rate'] : null,
+            'respiratory_rate' => isset($vitalSigns['respiratory_rate']) && $vitalSigns['respiratory_rate'] !== '' ? $vitalSigns['respiratory_rate'] : null,
+            'fetal_heart_tone' => isset($vitalSigns['fetal_heart_tone']) && $vitalSigns['fetal_heart_tone'] !== '' ? $vitalSigns['fetal_heart_tone'] : null,
+            'fundal_height' => isset($vitalSigns['fundal_height']) && $vitalSigns['fundal_height'] !== '' ? $vitalSigns['fundal_height'] : null,
+            'others' => isset($vitalSigns['others']) && $vitalSigns['others'] !== '' ? $vitalSigns['others'] : null,
+            'is_completed' => $data['is_completed'] ?? false,
+        ];
+        
+        Log::info('updateOrCreatePrenatalVisit - Processed data to save', [
+            'visit_number' => $visitNumber,
+            'visit_data' => $visitData,
+        ]);
+        
         return $record->prenatalVisits()->updateOrCreate(
             [
                 'maternal_record_id' => $record->id,
                 'visit_number' => $visitNumber
             ],
-            [
-                'visit_date' => $data['visit_date'] ?? null,
-                'weight' => $data['vital_signs']['weight'] ?? null,
-                'height' => $data['vital_signs']['height'] ?? null,
-                'blood_pressure_systolic' => $data['vital_signs']['blood_pressure_systolic'] ?? null,
-                'blood_pressure_diastolic' => $data['vital_signs']['blood_pressure_diastolic'] ?? null,
-                'temperature' => $data['vital_signs']['temperature'] ?? null,
-                'heart_rate' => $data['vital_signs']['heart_rate'] ?? null,
-                'respiratory_rate' => $data['vital_signs']['respiratory_rate'] ?? null,
-                'fetal_heart_tone' => $data['vital_signs']['fetal_heart_tone'] ?? null,
-                'fundal_height' => $data['vital_signs']['fundal_height'] ?? null,
-                'others' => $data['vital_signs']['others'] ?? null,
-                'is_completed' => $data['is_completed'] ?? false,
-            ]
+            $visitData
         );
     }
     
@@ -371,6 +386,8 @@ class MaternalCareService
      */
     public function updateOrCreateSupplementationVisit(MaternalRecord $record, int $visitNumber, array $data): PrenatalSupplementation
     {
+        $vitalSigns = $data['vital_signs'] ?? [];
+        
         return $record->prenatalSupplementations()->updateOrCreate(
             [
                 'maternal_record_id' => $record->id,
@@ -380,16 +397,16 @@ class MaternalCareService
             [
                 'supplementation_date' => $data['visit_date'] ?? null,
                 'tablets_given' => $data['tablets'] ?? null,
-                'weight' => $data['vital_signs']['weight'] ?? null,
-                'height' => $data['vital_signs']['height'] ?? null,
-                'blood_pressure_systolic' => $data['vital_signs']['blood_pressure_systolic'] ?? null,
-                'blood_pressure_diastolic' => $data['vital_signs']['blood_pressure_diastolic'] ?? null,
-                'temperature' => $data['vital_signs']['temperature'] ?? null,
-                'heart_rate' => $data['vital_signs']['heart_rate'] ?? null,
-                'respiratory_rate' => $data['vital_signs']['respiratory_rate'] ?? null,
-                'fetal_heart_tone' => $data['vital_signs']['fetal_heart_tone'] ?? null,
-                'fundal_height' => $data['vital_signs']['fundal_height'] ?? null,
-                'others' => $data['vital_signs']['others'] ?? null,
+                'weight' => isset($vitalSigns['weight']) && $vitalSigns['weight'] !== '' ? $vitalSigns['weight'] : null,
+                'height' => isset($vitalSigns['height']) && $vitalSigns['height'] !== '' ? $vitalSigns['height'] : null,
+                'blood_pressure_systolic' => isset($vitalSigns['blood_pressure_systolic']) && $vitalSigns['blood_pressure_systolic'] !== '' ? $vitalSigns['blood_pressure_systolic'] : null,
+                'blood_pressure_diastolic' => isset($vitalSigns['blood_pressure_diastolic']) && $vitalSigns['blood_pressure_diastolic'] !== '' ? $vitalSigns['blood_pressure_diastolic'] : null,
+                'temperature' => isset($vitalSigns['temperature']) && $vitalSigns['temperature'] !== '' ? $vitalSigns['temperature'] : null,
+                'heart_rate' => isset($vitalSigns['heart_rate']) && $vitalSigns['heart_rate'] !== '' ? $vitalSigns['heart_rate'] : null,
+                'respiratory_rate' => isset($vitalSigns['respiratory_rate']) && $vitalSigns['respiratory_rate'] !== '' ? $vitalSigns['respiratory_rate'] : null,
+                'fetal_heart_tone' => isset($vitalSigns['fetal_heart_tone']) && $vitalSigns['fetal_heart_tone'] !== '' ? $vitalSigns['fetal_heart_tone'] : null,
+                'fundal_height' => isset($vitalSigns['fundal_height']) && $vitalSigns['fundal_height'] !== '' ? $vitalSigns['fundal_height'] : null,
+                'others' => isset($vitalSigns['others']) && $vitalSigns['others'] !== '' ? $vitalSigns['others'] : null,
                 'is_completed' => $data['is_completed'] ?? false,
             ]
         );
@@ -441,7 +458,7 @@ class MaternalCareService
                 $isCompleted = in_array($visitNumber, $completedVisits);
                 
                 // Check if visit has any data (date, tablets, vital signs, or is completed)
-                $hasVitalSigns = !empty(array_filter($vitalSigns));
+                $hasVitalSigns = !empty(array_filter($vitalSigns, fn($v) => $v !== null && $v !== ''));
                 $hasData = !empty($visit['date']) || !empty($visit['tablets']) || $hasVitalSigns || $isCompleted;
                 
                 // Only create visit if it has some data
@@ -451,16 +468,16 @@ class MaternalCareService
                         'visit_number' => $visitNumber,
                         'supplementation_date' => $visit['date'] ?? null,
                         'tablets_given' => $visit['tablets'] ?? null,
-                        'weight' => $vitalSigns['weight'] ?? null,
-                        'height' => $vitalSigns['height'] ?? null,
-                        'blood_pressure_systolic' => $vitalSigns['blood_pressure_systolic'] ?? null,
-                        'blood_pressure_diastolic' => $vitalSigns['blood_pressure_diastolic'] ?? null,
-                        'temperature' => $vitalSigns['temperature'] ?? null,
-                        'heart_rate' => $vitalSigns['heart_rate'] ?? null,
-                        'respiratory_rate' => $vitalSigns['respiratory_rate'] ?? null,
-                        'fetal_heart_tone' => $vitalSigns['fetal_heart_tone'] ?? null,
-                        'fundal_height' => $vitalSigns['fundal_height'] ?? null,
-                        'others' => $vitalSigns['others'] ?? null,
+                        'weight' => isset($vitalSigns['weight']) && $vitalSigns['weight'] !== '' ? $vitalSigns['weight'] : null,
+                        'height' => isset($vitalSigns['height']) && $vitalSigns['height'] !== '' ? $vitalSigns['height'] : null,
+                        'blood_pressure_systolic' => isset($vitalSigns['blood_pressure_systolic']) && $vitalSigns['blood_pressure_systolic'] !== '' ? $vitalSigns['blood_pressure_systolic'] : null,
+                        'blood_pressure_diastolic' => isset($vitalSigns['blood_pressure_diastolic']) && $vitalSigns['blood_pressure_diastolic'] !== '' ? $vitalSigns['blood_pressure_diastolic'] : null,
+                        'temperature' => isset($vitalSigns['temperature']) && $vitalSigns['temperature'] !== '' ? $vitalSigns['temperature'] : null,
+                        'heart_rate' => isset($vitalSigns['heart_rate']) && $vitalSigns['heart_rate'] !== '' ? $vitalSigns['heart_rate'] : null,
+                        'respiratory_rate' => isset($vitalSigns['respiratory_rate']) && $vitalSigns['respiratory_rate'] !== '' ? $vitalSigns['respiratory_rate'] : null,
+                        'fetal_heart_tone' => isset($vitalSigns['fetal_heart_tone']) && $vitalSigns['fetal_heart_tone'] !== '' ? $vitalSigns['fetal_heart_tone'] : null,
+                        'fundal_height' => isset($vitalSigns['fundal_height']) && $vitalSigns['fundal_height'] !== '' ? $vitalSigns['fundal_height'] : null,
+                        'others' => isset($vitalSigns['others']) && $vitalSigns['others'] !== '' ? $vitalSigns['others'] : null,
                         'is_completed' => $isCompleted,
                     ]);
                 }

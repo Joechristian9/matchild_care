@@ -64,17 +64,17 @@ export default function MaternalCare({ records, filters = {} }) {
 
             <div className="min-h-screen bg-gray-50/50">
                 {/* Hero Header */}
-                <div className="bg-gradient-to-r from-pink-500 via-rose-500 to-red-500 px-6 py-8 lg:px-10">
+                <div className="bg-gradient-to-r from-pink-500 via-rose-500 to-red-500 px-4 py-4 lg:px-6">
                     <div className="mx-auto max-w-7xl flex items-center justify-between">
                         <div>
-                            <h1 className="text-2xl font-bold text-white">All Maternal Care Records</h1>
-                            <p className="text-pink-100 text-sm mt-1">Complete list of registered patients</p>
+                            <h1 className="text-xl font-bold text-white">All Maternal Care Records</h1>
+                            <p className="text-pink-100 text-xs mt-0.5">Complete list of registered patients</p>
                         </div>
                         <a
                             href={route("parent.maternal-care.bulk-pdf")}
-                            className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-rose-600 text-sm font-semibold rounded-xl shadow-md hover:bg-rose-50 transition-colors border border-rose-100"
+                            className="inline-flex items-center gap-1.5 px-3 py-2 bg-white text-rose-600 text-xs font-semibold rounded-lg shadow hover:bg-rose-50 transition-colors border border-rose-100"
                         >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                                     d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>

@@ -26,6 +26,7 @@ export default function MaternalCareEdit({ record = null, isEdit = false }) {
     ];
 
     const { data, setData, put, processing, errors, reset } = useForm({
+        id: record?.id || null,
         date_of_registration: record?.date_of_registration || new Date().toISOString().split("T")[0],
         family_serial:   record?.family_serial   || "",
         last_name:       record?.last_name        || "",
@@ -58,17 +59,15 @@ export default function MaternalCareEdit({ record = null, isEdit = false }) {
         parity:                   record?.parity                   || "",
         expected_date_of_delivery: record?.expected_date_of_delivery || "",
 
-        visits: record?.prenatal_visits?.reduce((acc, v) => {
-            acc[`visit_${v.visit_number}`] = v.visit_date || "";
-            return acc;
-        }, { visit_1:"",visit_2:"",visit_3:"",visit_4:"",visit_5:"",visit_6:"",visit_7:"",visit_8:"" })
-        || { visit_1:"",visit_2:"",visit_3:"",visit_4:"",visit_5:"",visit_6:"",visit_7:"",visit_8:"" },
+        visits: record?.visits || { visit_1:"",visit_2:"",visit_3:"",visit_4:"",visit_5:"",visit_6:"",visit_7:"",visit_8:"" },
 
-        completedVisits: record?.prenatal_visits?.filter(v => v.is_completed).map(v => v.visit_number) || [],
-        ...(record?.prenatal_visits?.reduce((acc, v) => {
-            acc[`visit_${v.visit_number}_vital_signs`] = v.vital_signs || {};
+        completedVisits: record?.completedVisits || [],
+        
+        // Spread all visit vital signs from record (visit_1_vital_signs, visit_2_vital_signs, etc.)
+        ...(record ? Object.keys(record).filter(key => key.includes('_vital_signs')).reduce((acc, key) => {
+            acc[key] = record[key] || {};
             return acc;
-        }, {}) || {}),
+        }, {}) : {}),
 
         nutritional_assessment: record?.nutritional_assessment ? {
             height:    record.nutritional_assessment.height              || "",

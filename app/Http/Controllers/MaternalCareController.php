@@ -119,27 +119,32 @@ class MaternalCareController extends Controller
             'parity' => $maternalRecord->parity,
             'expected_date_of_delivery' => $formatDate($maternalRecord->expected_date_of_delivery),
 
-            // Prenatal visits
-            'prenatal_visits' => $maternalRecord->prenatalVisits->map(function($visit) use ($formatDate) {
-                return [
-                    'visit_number' => $visit->visit_number,
-                    'visit_date' => $formatDate($visit->visit_date),
-                    'is_completed' => $visit->is_completed,
-                    'vital_signs' => [
-                        'weight' => $visit->weight,
-                        'height' => $visit->height,
-                        'blood_pressure_systolic' => $visit->blood_pressure_systolic,
-                        'blood_pressure_diastolic' => $visit->blood_pressure_diastolic,
-                        'temperature' => $visit->temperature,
-                        'heart_rate' => $visit->heart_rate,
-                        'respiratory_rate' => $visit->respiratory_rate,
-                        'fetal_heart_tone' => $visit->fetal_heart_tone,
-                        'fundal_height' => $visit->fundal_height,
-                        'others' => $visit->others,
-                    ],
-                ];
+            // Prenatal visits - format for the form component
+            'visits' => $maternalRecord->prenatalVisits->pluck('visit_date', 'visit_number')->mapWithKeys(function($date, $visitNumber) use ($formatDate) {
+                return ["visit_$visitNumber" => $formatDate($date)];
             })->toArray(),
-
+            
+            // Completed visits array
+            'completedVisits' => $maternalRecord->prenatalVisits->where('is_completed', true)->pluck('visit_number')->toArray(),
+        ];
+        
+        // Add vital signs for each prenatal visit
+        foreach ($maternalRecord->prenatalVisits as $visit) {
+            $formData["visit_{$visit->visit_number}_vital_signs"] = [
+                'weight' => $visit->weight,
+                'height' => $visit->height,
+                'blood_pressure_systolic' => $visit->blood_pressure_systolic,
+                'blood_pressure_diastolic' => $visit->blood_pressure_diastolic,
+                'temperature' => $visit->temperature,
+                'heart_rate' => $visit->heart_rate,
+                'respiratory_rate' => $visit->respiratory_rate,
+                'fetal_heart_tone' => $visit->fetal_heart_tone,
+                'fundal_height' => $visit->fundal_height,
+                'others' => $visit->others,
+            ];
+        }
+        
+        $formData += [
             // Nutritional assessment
             'nutritional_assessment' => $maternalRecord->nutritionalAssessment ? [
                 'height' => $maternalRecord->nutritionalAssessment->height,
@@ -410,7 +415,13 @@ class MaternalCareController extends Controller
     public function updatePrenatalVisit(Request $request, $recordId, $visitNumber)
     {
         try {
-            $request->validate([
+            Log::info('updatePrenatalVisit called', [
+                'record_id' => $recordId,
+                'visit_number' => $visitNumber,
+                'request_data' => $request->all()
+            ]);
+            
+            $validated = $request->validate([
                 'visit_date' => 'nullable|date',
                 'vital_signs' => 'nullable|array',
                 'vital_signs.weight' => 'nullable|numeric|min:0|max:300',
@@ -425,6 +436,8 @@ class MaternalCareController extends Controller
                 'vital_signs.others' => 'nullable|string',
                 'is_completed' => 'nullable|boolean',
             ]);
+            
+            Log::info('Validated data', ['validated' => $validated]);
 
             $maternalRecord = MaternalRecord::findOrFail($recordId);
 
@@ -437,6 +450,8 @@ class MaternalCareController extends Controller
                     'is_completed' => $request->input('is_completed', false),
                 ]
             );
+            
+            Log::info('Visit saved', ['visit' => $visit->toArray()]);
 
             return response()->json([
                 'success' => true,
@@ -444,16 +459,24 @@ class MaternalCareController extends Controller
                 'visit' => $visit
             ]);
 
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('Validation failed', ['errors' => $e->errors()]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
         } catch (\Exception $e) {
             Log::error('Failed to update prenatal visit', [
                 'record_id' => $recordId,
                 'visit_number' => $visitNumber,
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to update prenatal visit'
+                'message' => $e->getMessage()
             ], 500);
         }
     }

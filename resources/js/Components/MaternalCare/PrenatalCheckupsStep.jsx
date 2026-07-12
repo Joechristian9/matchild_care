@@ -38,17 +38,42 @@ export default function PrenatalCheckupsStep({ data, setData, errors }) {
             return;
         }
         
-        // Get vital signs for this visit
-        const vitalSigns = getVisitVitalSigns(visitNum);
+        // Get vital signs for this visit and clean empty values
+        const rawVitalSigns = getVisitVitalSigns(visitNum);
+        console.log('Raw vital signs before cleaning:', rawVitalSigns);
+        
+        const vitalSigns = {};
+        
+        // Only include non-empty values
+        Object.keys(rawVitalSigns).forEach(key => {
+            const value = rawVitalSigns[key];
+            if (value !== null && value !== undefined && value !== '') {
+                vitalSigns[key] = value;
+            }
+        });
+        
+        console.log('Cleaned vital signs:', vitalSigns);
         
         // If we're in edit mode and have a record ID, save to database
         if (data.id) {
             try {
+                // Get CSRF token
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                if (!csrfToken) {
+                    throw new Error('CSRF token not found. Please refresh the page.');
+                }
+                
+                console.log('Sending visit data:', {
+                    visit_date: data.visits[`visit_${visitNum}`],
+                    vital_signs: vitalSigns,
+                    is_completed: true,
+                });
+                
                 const response = await fetch(`/parent/maternal-care/${data.id}/visit/${visitNum}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'X-CSRF-TOKEN': csrfToken,
                     },
                     body: JSON.stringify({
                         visit_date: data.visits[`visit_${visitNum}`],
@@ -58,13 +83,23 @@ export default function PrenatalCheckupsStep({ data, setData, errors }) {
                 });
 
                 if (!response.ok) {
-                    throw new Error('Failed to save visit');
+                    const errorData = await response.json().catch(() => ({ message: `HTTP ${response.status}: ${response.statusText}` }));
+                    console.error('Server error:', errorData);
+                    
+                    // Show validation errors if present
+                    if (errorData.errors) {
+                        const errorMessages = Object.values(errorData.errors).flat().join('\n');
+                        throw new Error(`Validation errors:\n${errorMessages}`);
+                    }
+                    
+                    throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
                 }
                 
-                console.log('Visit saved to database successfully');
+                const result = await response.json();
+                console.log('Visit saved to database successfully:', result);
             } catch (error) {
                 console.error('Error saving visit:', error);
-                alert('Failed to save visit to database. Please try again.');
+                alert(`Failed to save visit to database:\n${error.message}`);
                 return;
             }
         } else {
@@ -93,6 +128,75 @@ export default function PrenatalCheckupsStep({ data, setData, errors }) {
     // Close modal
     const closeModal = () => {
         setSelectedVisit(null);
+    };
+    
+    // Save changes to a completed visit
+    const handleSaveCompletedVisit = async (visitNum) => {
+        // Get vital signs for this visit and clean empty values
+        const rawVitalSigns = getVisitVitalSigns(visitNum);
+        const vitalSigns = {};
+        
+        // Only include non-empty values
+        Object.keys(rawVitalSigns).forEach(key => {
+            const value = rawVitalSigns[key];
+            if (value !== null && value !== undefined && value !== '') {
+                vitalSigns[key] = value;
+            }
+        });
+        
+        // If we're in edit mode and have a record ID, save to database
+        if (data.id) {
+            try {
+                // Get CSRF token
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                if (!csrfToken) {
+                    throw new Error('CSRF token not found. Please refresh the page.');
+                }
+                
+                console.log('Updating completed visit:', {
+                    visit_date: data.visits[`visit_${visitNum}`],
+                    vital_signs: vitalSigns,
+                    is_completed: true,
+                });
+                
+                const response = await fetch(`/parent/maternal-care/${data.id}/visit/${visitNum}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                    },
+                    body: JSON.stringify({
+                        visit_date: data.visits[`visit_${visitNum}`],
+                        vital_signs: vitalSigns,
+                        is_completed: true,
+                    }),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ message: `HTTP ${response.status}: ${response.statusText}` }));
+                    console.error('Server error:', errorData);
+                    
+                    // Show validation errors if present
+                    if (errorData.errors) {
+                        const errorMessages = Object.values(errorData.errors).flat().join('\n');
+                        throw new Error(`Validation errors:\n${errorMessages}`);
+                    }
+                    
+                    throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const result = await response.json();
+                console.log('Completed visit updated successfully:', result);
+                alert('Visit updated successfully!');
+                closeModal();
+            } catch (error) {
+                console.error('Error updating visit:', error);
+                alert(`Failed to update visit:\n${error.message}`);
+            }
+        } else {
+            // In CREATE mode - just close modal
+            closeModal();
+        }
     };
 
     // Render vital signs form
@@ -460,12 +564,18 @@ export default function PrenatalCheckupsStep({ data, setData, errors }) {
                             </div>
 
                             {/* Modal Footer */}
-                            <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end">
+                            <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-between gap-3">
                                 <button
                                     onClick={closeModal}
+                                    className="px-6 py-2.5 bg-gray-200 text-gray-700 font-semibold rounded-lg shadow-sm hover:bg-gray-300 transition-all duration-200"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={() => handleSaveCompletedVisit(selectedVisit)}
                                     className="px-6 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold rounded-lg shadow-md hover:shadow-lg hover:from-green-600 hover:to-emerald-700 transition-all duration-200"
                                 >
-                                    Done
+                                    Save Changes
                                 </button>
                             </div>
                         </div>

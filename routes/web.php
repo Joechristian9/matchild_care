@@ -47,17 +47,8 @@ Route::get('/dashboard', function () {
             ->count(),
     ];
 
-    // Optimize: Only select needed columns for records table and paginate
-    $records = \App\Models\MaternalRecord::select([
-            'id', 'family_serial', 'first_name', 'last_name', 'middle_initial',
-            'age', 'age_group', 'date_of_registration', 'expected_date_of_delivery'
-        ])
-        ->orderBy('id', 'desc')  // Order by ID descending (latest first)
-        ->paginate(15);
-
     return Inertia::render('Dashboard', [
-        'stats' => $stats,
-        'records' => $records
+        'stats' => $stats
     ]);
 })->middleware(['auth', 'verified'])->name('dashboard');
 Route::middleware('auth')->group(function () {
